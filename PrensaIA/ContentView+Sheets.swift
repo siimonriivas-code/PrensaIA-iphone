@@ -130,6 +130,18 @@ extension ContentView {
                         .font(.caption2).foregroundStyle(.secondary)
                 }
 
+                Section("Motor de transcripción") {
+                    Picker("Motor", selection: $engineRaw) {
+                        Text("Preciso").tag("whisper")
+                        Text("Rápido").tag("fast")
+                    }
+                    .pickerStyle(.segmented)
+                    Text(engineRaw == "fast"
+                         ? "Rápido (Parakeet): transcribe en segundos usando el chip de IA del iPhone. La 1ª vez descarga un modelo (~600 MB, una sola vez). Ojo: la transcripción en vivo y “leer casi en vivo” siguen usando el motor Preciso."
+                         : "Preciso (Whisper): el motor de siempre, máxima calidad de texto. Si un video largo te urge, prueba el Rápido y compara.")
+                        .font(.caption2).foregroundStyle(.secondary)
+                }
+
                 Section("Apariencia") {
                     Picker("Tema", selection: $themeRaw) {
                         Text("Sistema").tag("system")

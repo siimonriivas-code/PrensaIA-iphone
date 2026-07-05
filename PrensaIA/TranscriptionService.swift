@@ -135,8 +135,14 @@ final class TranscriptionService {
 
     // MARK: Carga del modelo (segura para llamarse varias veces)
 
-    func prepareModelIfNeeded() async {
+    func prepareModelIfNeeded(force: Bool = false) async {
+        // Si el usuario eligió el motor Rápido, no cargamos Whisper al arrancar.
+        // force=true lo carga de todas formas (transcripción en vivo y "leer casi
+        // en vivo" funcionan solo con Whisper).
+        if !force, UserDefaults.standard.string(forKey: "prensaia_engine") == "fast" { return }
         if whisperKit != nil { return }
+        // Ley de memoria: nunca dos motores de transcripción cargados a la vez.
+        FastTranscriber.shared.unload()
         if let loadTask {
             await loadTask.value
             return
@@ -204,7 +210,7 @@ final class TranscriptionService {
         liveDone = false
         liveConfirmed = ""
         liveHypothesis = ""
-        await prepareModelIfNeeded()
+        await prepareModelIfNeeded(force: true)
         guard let whisperKit, let tokenizer = whisperKit.tokenizer else {
             liveStarting = false
             return
@@ -293,7 +299,7 @@ final class TranscriptionService {
         followOffset = 44
         followTask = Task { @MainActor [weak self] in
             guard let self else { return }
-            await self.prepareModelIfNeeded()
+            await self.prepareModelIfNeeded(force: true)
             guard self.whisperKit != nil else {
                 self.followHint = "No se pudo preparar el modelo. Revisa tu internet la primera vez."
                 self.followActive = false
@@ -415,11 +421,25 @@ final class TranscriptionService {
         playbackURL = nil
         isVideo = false
 
-        if whisperKit == nil { phase = .preparingModel }
-        await prepareModelIfNeeded()
-        guard let whisperKit else {
-            phase = .failed("No se pudo preparar el modelo. Conéctate a internet la primera vez e inténtalo de nuevo.")
-            return
+        // Motor elegido por el usuario (Historial → Motor de transcripción).
+        let useFastEngine = UserDefaults.standard.string(forKey: "prensaia_engine") == "fast"
+        if useFastEngine {
+            // Ley de memoria: descargar Whisper antes de cargar Parakeet.
+            whisperKit = nil
+            if !FastTranscriber.shared.isReady { phase = .preparingModel }
+            let ok = await FastTranscriber.shared.ensureLoaded()
+            guard ok else {
+                phase = .failed("No se pudo preparar el motor Rápido. La primera vez necesita internet para descargar su modelo (~600 MB). Mientras tanto, puedes volver al motor Preciso en Historial → Motor de transcripción.")
+                return
+            }
+        } else {
+            FastTranscriber.shared.unload()
+            if whisperKit == nil { phase = .preparingModel }
+            await prepareModelIfNeeded(force: true)
+            guard whisperKit != nil else {
+                phase = .failed("No se pudo preparar el modelo. Conéctate a internet la primera vez e inténtalo de nuevo.")
+                return
+            }
         }
 
         do {
@@ -448,25 +468,35 @@ final class TranscriptionService {
             }
 
             phase = .transcribing(0)
-            startProgressTimer(audioDuration: audioDuration)
+            startProgressTimer(audioDuration: audioDuration, fast: useFastEngine)
 
-            let options = DecodingOptions(task: .transcribe, language: "es")
-            let results = try await whisperKit.transcribe(
-                audioPath: audioURL.path(percentEncoded: false),
-                decodeOptions: options
-            )
-
-            stopProgressTimer()
-
-            segments = results
-                .flatMap { $0.segments }
-                .map { TimedSegment(start: Double($0.start),
-                                    end: Double($0.end),
-                                    text: cleanText($0.text)) }
-                .filter { !$0.text.isEmpty }
-
-            let fullText = cleanText(results.map { $0.text }.joined(separator: " "))
-            transcript = fullText.isEmpty ? "No se detectó voz en el archivo." : fullText
+            if useFastEngine {
+                // Motor RÁPIDO (Parakeet en el Neural Engine).
+                let fast = try await FastTranscriber.shared.transcribe(url: audioURL)
+                stopProgressTimer()
+                segments = fast.segments
+                    .map { TimedSegment(start: $0.start, end: $0.end, text: cleanText($0.text)) }
+                    .filter { !$0.text.isEmpty }
+                let fullText = cleanText(fast.text)
+                transcript = fullText.isEmpty ? "No se detectó voz en el archivo." : fullText
+            } else {
+                // Motor PRECISO (Whisper), el de siempre.
+                guard let whisperKit else { throw NSError(domain: "PrensaIA", code: 3) }
+                let options = DecodingOptions(task: .transcribe, language: "es")
+                let results = try await whisperKit.transcribe(
+                    audioPath: audioURL.path(percentEncoded: false),
+                    decodeOptions: options
+                )
+                stopProgressTimer()
+                segments = results
+                    .flatMap { $0.segments }
+                    .map { TimedSegment(start: Double($0.start),
+                                        end: Double($0.end),
+                                        text: cleanText($0.text)) }
+                    .filter { !$0.text.isEmpty }
+                let fullText = cleanText(results.map { $0.text }.joined(separator: " "))
+                transcript = fullText.isEmpty ? "No se detectó voz en el archivo." : fullText
+            }
 
             applyCorrections()
 
@@ -659,6 +689,7 @@ final class TranscriptionService {
         // Se vuelven a cargar solos la próxima vez que transcribas.
         whisperKit = nil
         speakerKit = nil
+        FastTranscriber.shared.unload()
 
         await LocalAI.shared.ensureLoaded()
         if Task.isCancelled { return }
@@ -925,9 +956,9 @@ final class TranscriptionService {
 
     // MARK: Progreso estimado de la transcripción
 
-    private func startProgressTimer(audioDuration: Double) {
+    private func startProgressTimer(audioDuration: Double, fast: Bool = false) {
         transcribeStart = Date()
-        estimatedSeconds = max(2.0, audioDuration * 0.2)
+        estimatedSeconds = max(2.0, audioDuration * (fast ? 0.03 : 0.2))
         progressTimer?.invalidate()
         progressTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { _ in
             Task { @MainActor [weak self] in

@@ -17,6 +17,7 @@
 		8D5050112FE610460046FDE9 /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = 8D5050102FE610460046FDE9 /* MLX */; };
 		8D95BE8C2FDDEDFF00A6B58A /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = 8D95BE8B2FDDEDFF00A6B58A /* WhisperKit */; };
 		8D99E79C2FDFD18D0035B4BB /* SpeakerKit in Frameworks */ = {isa = PBXBuildFile; productRef = 8D99E79B2FDFD18D0035B4BB /* SpeakerKit */; };
+		8DB63E852FFB133A002416F5 /* FluidAudio in Frameworks */ = {isa = PBXBuildFile; productRef = FA1DA0D100000000000000A2 /* FluidAudio */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -103,6 +104,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8DB63E852FFB133A002416F5 /* FluidAudio in Frameworks */,
 				8D4840402FE4328A00B2E4A2 /* MLXLMCommon in Frameworks */,
 				8D48404A2FE433B600B2E4A2 /* Tokenizers in Frameworks */,
 				8D48403E2FE4328A00B2E4A2 /* MLXLLM in Frameworks */,
@@ -196,6 +198,7 @@
 				8D4840462FE4334500B2E4A2 /* HuggingFace */,
 				8D4840492FE433B600B2E4A2 /* Tokenizers */,
 				8D5050102FE610460046FDE9 /* MLX */,
+				FA1DA0D100000000000000A2 /* FluidAudio */,
 			);
 			productName = PrensaIA;
 			productReference = 8D95BE7C2FDDEBB300A6B58A /* PrensaIA.app */;
@@ -234,6 +237,7 @@
 				8D4840452FE4334500B2E4A2 /* XCRemoteSwiftPackageReference "swift-huggingface" */,
 				8D4840482FE433B600B2E4A2 /* XCRemoteSwiftPackageReference "swift-transformers" */,
 				8D50500F2FE610460046FDE9 /* XCRemoteSwiftPackageReference "mlx-swift" */,
+				FA1DA0D100000000000000A1 /* XCRemoteSwiftPackageReference "FluidAudio" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 8D95BE7D2FDDEBB300A6B58A /* Products */;
@@ -611,6 +615,14 @@
 				minimumVersion = 1.0.0;
 			};
 		};
+		FA1DA0D100000000000000A1 /* XCRemoteSwiftPackageReference "FluidAudio" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/FluidInference/FluidAudio.git";
+			requirement = {
+				kind = exactVersion;
+				version = 0.15.4;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -653,6 +665,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8D95BE8A2FDDEDFF00A6B58A /* XCRemoteSwiftPackageReference "argmax-oss-swift" */;
 			productName = SpeakerKit;
+		};
+		FA1DA0D100000000000000A2 /* FluidAudio */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FA1DA0D100000000000000A1 /* XCRemoteSwiftPackageReference "FluidAudio" */;
+			productName = FluidAudio;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
