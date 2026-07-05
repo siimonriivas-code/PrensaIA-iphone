@@ -18,7 +18,10 @@ extension ContentView {
                     // Estado en vivo (se actualiza solo, sin botón "Actualizar").
                     HStack(spacing: 10) {
                         if liveCapture.isCapturing {
-                            Circle().fill(.red).frame(width: 12, height: 12)
+                            Image(systemName: "circle.fill")
+                                .font(.system(size: 12))
+                                .foregroundStyle(.red)
+                                .symbolEffect(.pulse)
                             Text("Capturando…").font(.headline)
                             Spacer()
                             if let size = liveCapture.capturedSizeText() {
@@ -144,8 +147,10 @@ extension ContentView {
                         }
                     } label: {
                         Label("Transcribir lo capturado", systemImage: "text.badge.checkmark")
+                            .mainButtonLabel()
                     }
-                    .buttonStyle(PrimaryButtonStyle())
+                    .buttonStyle(.glassProminent)
+                    .tint(.brand)
                     .disabled(liveCapture.capturedAudioURL() == nil)
 
                     if liveCapture.capturedSizeText() != nil && !liveCapture.isCapturing {

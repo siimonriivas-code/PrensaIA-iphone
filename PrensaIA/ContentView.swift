@@ -123,6 +123,7 @@ struct ContentView: View {
                 .animation(.smooth(duration: 0.35), value: service.isLive)
             }
             .scrollDismissesKeyboard(.interactively)
+            .scrollEdgeEffectStyle(.soft, for: .top)   // difumina el contenido bajo la barra (iOS 26)
             .background { AppBackdrop() }
             .navigationBarTitleDisplayMode(.inline)
             .task { await service.prepareModelIfNeeded() }

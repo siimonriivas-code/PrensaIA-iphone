@@ -203,7 +203,7 @@ extension ContentView {
                     Text(b.tema).font(.subheadline.weight(.bold)).foregroundStyle(.primary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     Text(manual ? "MÍO" : "IA")
-                        .font(.system(size: 9, weight: .bold))
+                        .font(.caption2.weight(.bold))
                         .padding(.horizontal, 6).padding(.vertical, 2)
                         .background(manual ? Color.brand.opacity(0.15) : Color.orange.opacity(0.18), in: Capsule())
                         .foregroundStyle(manual ? Color.brand : Color.orange)

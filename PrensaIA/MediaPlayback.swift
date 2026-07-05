@@ -52,7 +52,7 @@ final class MediaPlayerController {
 
         let interval = CMTime(seconds: 0.2, preferredTimescale: 600)
         timeObserver = avPlayer.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] t in
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
                 guard let self else { return }
                 self.currentTime = CMTimeGetSeconds(t)
                 self.isPlaying = self.avPlayer.timeControlStatus == .playing
@@ -61,7 +61,7 @@ final class MediaPlayerController {
         endObserver = NotificationCenter.default.addObserver(
             forName: .AVPlayerItemDidPlayToEndTime, object: item, queue: .main
         ) { [weak self] _ in
-            Task { @MainActor in self?.handleEnd() }
+            Task { @MainActor [weak self] in self?.handleEnd() }
         }
     }
 
@@ -103,7 +103,7 @@ final class MediaPlayerController {
         guard end > start else { return }
         let boundary = NSValue(time: CMTime(seconds: end, preferredTimescale: 600))
         boundaryObserver = avPlayer.addBoundaryTimeObserver(forTimes: [boundary], queue: .main) { [weak self] in
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
                 guard let self else { return }
                 self.avPlayer.pause()
                 self.isPlaying = false

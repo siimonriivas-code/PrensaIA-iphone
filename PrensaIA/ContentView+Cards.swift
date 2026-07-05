@@ -33,12 +33,13 @@ extension ContentView {
                 .shadow(color: .brand.opacity(0.4), radius: 14, y: 7)
 
             VStack(spacing: 7) {
+                // Tipografía dinámica: crece si el usuario sube el tamaño de texto en Ajustes.
                 Text("PrensaIA")
-                    .font(.system(size: 30, weight: .bold, design: .serif))
+                    .font(.system(.largeTitle, design: .serif, weight: .bold))
                 HStack(spacing: 10) {
                     Rectangle().fill(.secondary.opacity(0.35)).frame(width: 26, height: 1)
                     Text("TRANSCRIBE · ESCUCHA · ANALIZA")
-                        .font(.system(size: 10, weight: .semibold))
+                        .font(.caption2.weight(.semibold))
                         .tracking(2.2)
                         .foregroundStyle(.secondary)
                     Rectangle().fill(.secondary.opacity(0.35)).frame(width: 26, height: 1)
@@ -53,45 +54,61 @@ extension ContentView {
 
     var actionCard: some View {
         VStack(spacing: 12) {
-            Button {
-                showImporter = true
-            } label: {
-                Label("Subir audio o video", systemImage: "square.and.arrow.up.fill")
-            }
-            .buttonStyle(PrimaryButtonStyle())
+            // Los botones de vidrio van agrupados en un GlassEffectContainer
+            // para que el sistema los fusione visualmente (Liquid Glass, iOS 26).
+            GlassEffectContainer(spacing: 12) {
+                VStack(spacing: 12) {
+                    Button {
+                        showImporter = true
+                    } label: {
+                        Label("Subir audio o video", systemImage: "square.and.arrow.up.fill")
+                            .mainButtonLabel()
+                    }
+                    .buttonStyle(.glassProminent)
+                    .tint(.brand)
 
-            Button {
-                Task {
-                    let granted = await recorder.requestPermission()
-                    if granted { recorder.start() } else { recordDenied = true }
+                    Button {
+                        Task {
+                            let granted = await recorder.requestPermission()
+                            if granted { recorder.start() } else { recordDenied = true }
+                        }
+                    } label: {
+                        Label("Grabar audio", systemImage: "mic.fill")
+                            .mainButtonLabel()
+                    }
+                    .buttonStyle(.glass)
+                    .tint(.brand)
+
+                    Button {
+                        Task {
+                            let granted = await recorder.requestPermission()
+                            if granted { await service.startLive() } else { recordDenied = true }
+                        }
+                    } label: {
+                        Label("Transcripción en vivo", systemImage: "waveform.badge.mic")
+                            .mainButtonLabel()
+                    }
+                    .buttonStyle(.glass)
+                    .tint(.brand)
+
+                    PhotosPicker(selection: $photoItem, matching: .videos) {
+                        Label("Elegir video de la galería", systemImage: "photo.on.rectangle.angled")
+                            .mainButtonLabel()
+                    }
+                    .buttonStyle(.glass)
+                    .tint(.brand)
+
+                    Button {
+                        liveCapture.refresh()
+                        showLiveCapture = true
+                    } label: {
+                        Label("Transcribir Facebook Live", systemImage: "dot.radiowaves.left.and.right")
+                            .mainButtonLabel()
+                    }
+                    .buttonStyle(.glass)
+                    .tint(.brand)
                 }
-            } label: {
-                Label("Grabar audio", systemImage: "mic.fill")
             }
-            .buttonStyle(SecondaryButtonStyle())
-
-            Button {
-                Task {
-                    let granted = await recorder.requestPermission()
-                    if granted { await service.startLive() } else { recordDenied = true }
-                }
-            } label: {
-                Label("Transcripción en vivo", systemImage: "waveform.badge.mic")
-            }
-            .buttonStyle(SecondaryButtonStyle())
-
-            PhotosPicker(selection: $photoItem, matching: .videos) {
-                Label("Elegir video de la galería", systemImage: "photo.on.rectangle.angled")
-            }
-            .buttonStyle(SecondaryButtonStyle())
-
-            Button {
-                liveCapture.refresh()
-                showLiveCapture = true
-            } label: {
-                Label("Transcribir Facebook Live", systemImage: "dot.radiowaves.left.and.right")
-            }
-            .buttonStyle(SecondaryButtonStyle())
 
             if recordDenied {
                 Text("Para grabar, activa el micrófono en Ajustes › PrensaIA.")
@@ -154,7 +171,11 @@ extension ContentView {
     var recordingCard: some View {
         VStack(spacing: 16) {
             HStack(spacing: 10) {
-                Circle().fill(.red).frame(width: 12, height: 12)
+                // Punto rojo que "late" mientras se graba.
+                Image(systemName: "circle.fill")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.red)
+                    .symbolEffect(.pulse)
                 Text("Grabando…").font(.headline)
                 Spacer()
                 Text(timeLabel(recorder.elapsed))
@@ -167,8 +188,10 @@ extension ContentView {
                 }
             } label: {
                 Label("Detener y transcribir", systemImage: "stop.fill")
+                    .mainButtonLabel()
             }
-            .buttonStyle(PrimaryButtonStyle())
+            .buttonStyle(.glassProminent)
+            .tint(.brand)
             Button(role: .destructive) {
                 recorder.cancel()
             } label: {
@@ -187,7 +210,10 @@ extension ContentView {
                         .font(.title3).foregroundStyle(.green)
                     Text("Transcripción lista").font(.headline)
                 } else {
-                    Circle().fill(.red).frame(width: 12, height: 12)
+                    Image(systemName: "circle.fill")
+                        .font(.system(size: 12))
+                        .foregroundStyle(.red)
+                        .symbolEffect(.pulse)
                     Text(service.liveStarting ? "Preparando…" : "En vivo")
                         .font(.headline)
                     Spacer()
@@ -217,41 +243,48 @@ extension ContentView {
             }
 
             if service.liveDone {
-                HStack(spacing: 12) {
-                    Button {
-                        UIPasteboard.general.string = service.liveFullText
-                    } label: {
-                        Label("Copiar texto", systemImage: "doc.on.doc")
-                    }
-                    .buttonStyle(PrimaryButtonStyle())
+                GlassEffectContainer(spacing: 12) {
+                    HStack(spacing: 12) {
+                        Button {
+                            UIPasteboard.general.string = service.liveFullText
+                        } label: {
+                            Label("Copiar texto", systemImage: "doc.on.doc")
+                                .mainButtonLabel()
+                        }
+                        .buttonStyle(.glassProminent)
+                        .tint(.brand)
 
-                    Button(role: .destructive) {
-                        service.clearLive()
-                    } label: {
-                        Text("Listo").font(.subheadline.weight(.medium))
+                        Button(role: .destructive) {
+                            service.clearLive()
+                        } label: {
+                            Text("Listo").font(.subheadline.weight(.medium))
+                        }
                     }
                 }
             } else {
-                HStack(spacing: 12) {
-                    Button {
-                        Task { await service.stopLive() }
-                    } label: {
-                        Label("Detener", systemImage: "stop.fill")
-                    }
-                    .buttonStyle(PrimaryButtonStyle())
+                GlassEffectContainer(spacing: 12) {
+                    HStack(spacing: 12) {
+                        Button {
+                            Task { await service.stopLive() }
+                        } label: {
+                            Label("Detener", systemImage: "stop.fill")
+                                .mainButtonLabel()
+                        }
+                        .buttonStyle(.glassProminent)
+                        .tint(.brand)
 
-                    Button {
-                        UIPasteboard.general.string = service.liveFullText
-                    } label: {
-                        Image(systemName: "doc.on.doc")
-                            .font(.headline)
-                            .foregroundStyle(.brand)
-                            .frame(width: 52, height: 50)
-                            .background(Color.brand.opacity(0.12),
-                                        in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        Button {
+                            UIPasteboard.general.string = service.liveFullText
+                        } label: {
+                            Image(systemName: "doc.on.doc")
+                                .font(.headline)
+                                .frame(width: 44, height: 44)
+                        }
+                        .buttonStyle(.glass)
+                        .tint(.brand)
+                        .disabled(service.liveFullText.isEmpty)
+                        .accessibilityLabel("Copiar el texto transcrito")
                     }
-                    .buttonStyle(.plain)
-                    .disabled(service.liveFullText.isEmpty)
                 }
             }
         }

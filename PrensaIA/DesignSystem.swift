@@ -52,33 +52,16 @@ extension View {
     }
 }
 
-// Botón principal: Liquid Glass entintado e interactivo (iOS 26).
-struct PrimaryButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
+extension View {
+    /// Etiqueta de botón principal/secundario a lo ancho de la tarjeta.
+    /// Se usa junto con los estilos NATIVOS de Liquid Glass de iOS 26:
+    ///   .buttonStyle(.glassProminent)  → acción principal (vidrio entintado)
+    ///   .buttonStyle(.glass)           → acciones secundarias (vidrio claro)
+    /// Así el vidrio, el brillo y la reacción al toque los dibuja el sistema.
+    func mainButtonLabel() -> some View {
+        self
             .font(.headline)
-            .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .glassEffect(.regular.tint(.brand).interactive(),
-                         in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .shadow(color: .brand.opacity(0.25), radius: 10, y: 5)
-            .scaleEffect(configuration.isPressed ? 0.97 : 1)
-            .animation(.snappy(duration: 0.15), value: configuration.isPressed)
-    }
-}
-
-// Botón secundario: cristal transparente que refracta el fondo.
-struct SecondaryButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(.headline)
-            .foregroundStyle(Color.brand)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .glassEffect(.regular.interactive(),
-                         in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .scaleEffect(configuration.isPressed ? 0.97 : 1)
-            .animation(.snappy(duration: 0.15), value: configuration.isPressed)
+            .padding(.vertical, 8)
     }
 }

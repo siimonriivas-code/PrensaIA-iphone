@@ -60,7 +60,7 @@ struct OnboardingView: View {
 
                         VStack(spacing: 12) {
                             Text(f.title)
-                                .font(.system(size: 26, weight: .bold, design: .serif))
+                                .font(.system(.title, design: .serif, weight: .bold))
                                 .multilineTextAlignment(.center)
                             Text(f.text)
                                 .font(.callout)
@@ -85,8 +85,10 @@ struct OnboardingView: View {
                 }
             } label: {
                 Text(page < features.count - 1 ? "Siguiente" : "Comenzar")
+                    .mainButtonLabel()
             }
-            .buttonStyle(PrimaryButtonStyle())
+            .buttonStyle(.glassProminent)
+            .tint(.brand)
             .padding(.horizontal, 26)
             .padding(.bottom, 26)
         }
