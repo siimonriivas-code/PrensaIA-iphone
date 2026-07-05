@@ -55,6 +55,8 @@ extension ContentView {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background { AppBackdrop() }
             .navigationTitle("Diccionario")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -137,6 +139,8 @@ extension ContentView {
                     .pickerStyle(.segmented)
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background { AppBackdrop() }
             .navigationTitle("Historial")
             .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $historySearch, prompt: "Buscar en transcripciones")
@@ -181,7 +185,7 @@ extension ContentView {
                     ), axis: .vertical)
                         .font(.callout)
                         .padding(10)
-                        .background(Color(.tertiarySystemGroupedBackground),
+                        .background(.thinMaterial,
                                     in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
             }
@@ -223,6 +227,6 @@ extension ContentView {
             }
         }
         .padding(4)
-        .background(Color(.tertiarySystemGroupedBackground), in: Capsule())
+        .background(.ultraThinMaterial, in: Capsule())
     }
 }

@@ -47,7 +47,7 @@ extension ContentView {
                     }
                     .padding(14)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(.secondarySystemGroupedBackground),
+                    .background(.thinMaterial,
                                 in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     .accessibilityElement(children: .combine)
 
@@ -61,7 +61,7 @@ extension ContentView {
                     }
                     .padding(16)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(.secondarySystemGroupedBackground),
+                    .background(.thinMaterial,
                                 in: RoundedRectangle(cornerRadius: 16, style: .continuous))
 
                     HStack(spacing: 14) {
@@ -128,7 +128,7 @@ extension ContentView {
                         }
                         .padding(16)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color(.secondarySystemGroupedBackground),
+                        .background(.thinMaterial,
                                     in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }
 

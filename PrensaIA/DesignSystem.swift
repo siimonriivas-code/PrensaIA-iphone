@@ -23,14 +23,28 @@ extension LinearGradient {
     }
 }
 
-// Fondo con atmósfera: lavado de color de marca que hace brillar el cristal.
+// Fondo "aurora": manchas de color difuminadas sobre el fondo del sistema.
+// ESTO es lo que hace visible el Liquid Glass: el vidrio y los materiales
+// refractan este color. Sin color detrás, el vidrio parece pintura plana.
 struct AppBackdrop: View {
     var body: some View {
         ZStack {
             Color(.systemGroupedBackground)
-            LinearGradient(
-                colors: [Color.brand.opacity(0.16), Color.brand.opacity(0.05), .clear],
-                startPoint: .top, endPoint: .center)
+            Circle()
+                .fill(Color.brand.opacity(0.38))
+                .frame(width: 420, height: 420)
+                .blur(radius: 90)
+                .offset(x: -130, y: -280)
+            Circle()
+                .fill(Color(red: 0.62, green: 0.32, blue: 0.95).opacity(0.30))
+                .frame(width: 360, height: 360)
+                .blur(radius: 100)
+                .offset(x: 170, y: -60)
+            Circle()
+                .fill(Color(red: 0.20, green: 0.55, blue: 0.95).opacity(0.24))
+                .frame(width: 400, height: 400)
+                .blur(radius: 110)
+                .offset(x: -40, y: 380)
         }
         .ignoresSafeArea()
     }
@@ -42,7 +56,7 @@ extension View {
         self
             .padding(20)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(.regularMaterial,
+            .background(.thinMaterial,
                         in: RoundedRectangle(cornerRadius: 26, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 26, style: .continuous)

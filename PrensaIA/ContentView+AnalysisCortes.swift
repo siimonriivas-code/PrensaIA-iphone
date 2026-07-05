@@ -218,7 +218,8 @@ extension ContentView {
             }
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(selected ? Color.brand.opacity(0.10) : Color(.secondarySystemBackground),
+            .background(selected ? AnyShapeStyle(Color.brand.opacity(0.14))
+                                 : AnyShapeStyle(.thinMaterial),
                         in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -352,7 +353,7 @@ extension ContentView {
                 TextField("Ej. ¿Qué dijo sobre el presupuesto?", text: $qaQuestion, axis: .vertical)
                     .font(.callout)
                     .padding(10)
-                    .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
                     .lineLimit(1...4)
                 Button {
                     askQuestion()
@@ -374,7 +375,7 @@ extension ContentView {
                         .font(.callout)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(12)
-                        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
                         .textSelection(.enabled)
                 }
             case .idle:
