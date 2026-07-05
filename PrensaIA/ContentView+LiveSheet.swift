@@ -21,7 +21,7 @@ extension ContentView {
                             Image(systemName: "circle.fill")
                                 .font(.system(size: 12))
                                 .foregroundStyle(.red)
-                                .symbolEffect(.pulse)
+                                .symbolEffect(.pulse, isActive: !reduceMotion)
                             Text("Capturando…").font(.headline)
                             Spacer()
                             if let size = liveCapture.capturedSizeText() {

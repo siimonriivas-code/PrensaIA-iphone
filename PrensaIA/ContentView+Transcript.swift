@@ -47,7 +47,7 @@ extension ContentView {
                     .font(.caption.weight(.bold))
                     .foregroundStyle(speakerColor(id))
                 Image(systemName: "pencil")
-                    .font(.system(size: 10))
+                    .font(.caption2)
                     .foregroundStyle(.secondary)
             }
         }

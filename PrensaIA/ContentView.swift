@@ -62,6 +62,9 @@ struct ContentView: View {
     @State var showDiccionario = false
     @State var nuevoMal = ""
     @State var nuevoBien = ""
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
+    @State var pdfExportFailed = false
+    @State var recordFailed = false
     @AppStorage("prensaia_theme") var themeRaw = "system"
     @AppStorage("prensaia_onboarded") var hasOnboarded = false
     @State var showOnboarding = false
@@ -231,6 +234,16 @@ struct ContentView: View {
             .sheet(isPresented: $showOnboarding, onDismiss: { hasOnboarded = true }) {
                 OnboardingView(isPresented: $showOnboarding)
             }
+            .alert("No se pudo crear el PDF", isPresented: $pdfExportFailed) {
+                Button("Entendido", role: .cancel) {}
+            } message: {
+                Text("Inténtalo de nuevo. Si sigue fallando, cierra y abre la app.")
+            }
+            .alert("No se pudo iniciar la grabación", isPresented: $recordFailed) {
+                Button("Entendido", role: .cancel) {}
+            } message: {
+                Text("Revisa que ninguna otra app esté usando el micrófono e inténtalo de nuevo.")
+            }
             .alert("Nombre del orador", isPresented: Binding(
                 get: { renamingSpeakerId != nil },
                 set: { if !$0 { renamingSpeakerId = nil } }
@@ -329,6 +342,8 @@ struct ContentView: View {
                                 if let url = exportPDF() {
                                     pdfURL = url
                                     showPDFShare = true
+                                } else {
+                                    pdfExportFailed = true
                                 }
                             } label: {
                                 Label("Exportar a PDF", systemImage: "doc.richtext")

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import OSLog
 
 // MARK: - Historial (guardado en el dispositivo)
 
@@ -66,8 +67,13 @@ final class HistoryStore {
     }
 
     private func persist() {
-        if let data = try? JSONEncoder().encode(items) {
-            try? data.write(to: indexURL, options: .atomic)
+        do {
+            let data = try JSONEncoder().encode(items)
+            try data.write(to: indexURL, options: .atomic)
+        } catch {
+            // No interrumpe al usuario, pero deja rastro para diagnóstico.
+            Logger(subsystem: "com.simonrivas.PrensaIA", category: "historial")
+                .error("No se pudo guardar el historial: \(error.localizedDescription)")
         }
     }
 

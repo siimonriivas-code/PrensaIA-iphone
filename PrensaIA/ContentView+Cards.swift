@@ -70,7 +70,10 @@ extension ContentView {
                     Button {
                         Task {
                             let granted = await recorder.requestPermission()
-                            if granted { recorder.start() } else { recordDenied = true }
+                            if granted {
+                                recorder.start()
+                                recordFailed = !recorder.isRecording
+                            } else { recordDenied = true }
                         }
                     } label: {
                         Label("Grabar audio", systemImage: "mic.fill")
@@ -175,7 +178,7 @@ extension ContentView {
                 Image(systemName: "circle.fill")
                     .font(.system(size: 12))
                     .foregroundStyle(.red)
-                    .symbolEffect(.pulse)
+                    .symbolEffect(.pulse, isActive: !reduceMotion)
                 Text("Grabando…").font(.headline)
                 Spacer()
                 Text(timeLabel(recorder.elapsed))
@@ -213,7 +216,7 @@ extension ContentView {
                     Image(systemName: "circle.fill")
                         .font(.system(size: 12))
                         .foregroundStyle(.red)
-                        .symbolEffect(.pulse)
+                        .symbolEffect(.pulse, isActive: !reduceMotion)
                     Text(service.liveStarting ? "Preparando…" : "En vivo")
                         .font(.headline)
                     Spacer()

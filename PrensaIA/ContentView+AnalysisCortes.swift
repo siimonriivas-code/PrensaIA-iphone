@@ -363,6 +363,7 @@ extension ContentView {
                         .foregroundStyle(qaTrimmedEmpty ? Color.secondary : Color.brand)
                 }
                 .disabled(qaTrimmedEmpty || service.qaState == .running)
+                .accessibilityLabel("Enviar pregunta")
             }
             switch service.qaState {
             case .running:
