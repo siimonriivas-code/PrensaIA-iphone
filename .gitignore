@@ -1,0 +1,16 @@
+# === macOS ===
+.DS_Store
+
+# === Xcode: artefactos de compilación y datos de usuario ===
+build/
+DerivedData/
+*.xcuserstate
+**/xcuserdata/
+
+# === Swift Package Manager (caché local de paquetes) ===
+.build/
+
+# === Modelo de IA local ===
+# Demasiado grande para GitHub (archivos de +100 MB). Se queda en tu Mac y
+# la app lo vuelve a descargar sola si hace falta. NO se sube al repositorio.
+PrensaIA/openai_whisper-large-v3-v20240930_turbo_632MB/

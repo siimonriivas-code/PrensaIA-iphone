@@ -1,0 +1,660 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		8D1E421E2FECAA1F00C14F06 /* ReplayKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8D1E421D2FECAA1F00C14F06 /* ReplayKit.framework */; };
+		8D1E42252FECAA1F00C14F06 /* PrensaLiveCapture.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 8D1E421C2FECAA1F00C14F06 /* PrensaLiveCapture.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		8D48403C2FE4328A00B2E4A2 /* MLXHuggingFace in Frameworks */ = {isa = PBXBuildFile; productRef = 8D48403B2FE4328A00B2E4A2 /* MLXHuggingFace */; };
+		8D48403E2FE4328A00B2E4A2 /* MLXLLM in Frameworks */ = {isa = PBXBuildFile; productRef = 8D48403D2FE4328A00B2E4A2 /* MLXLLM */; };
+		8D4840402FE4328A00B2E4A2 /* MLXLMCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 8D48403F2FE4328A00B2E4A2 /* MLXLMCommon */; };
+		8D4840472FE4334500B2E4A2 /* HuggingFace in Frameworks */ = {isa = PBXBuildFile; productRef = 8D4840462FE4334500B2E4A2 /* HuggingFace */; };
+		8D48404A2FE433B600B2E4A2 /* Tokenizers in Frameworks */ = {isa = PBXBuildFile; productRef = 8D4840492FE433B600B2E4A2 /* Tokenizers */; };
+		8D5050112FE610460046FDE9 /* MLX in Frameworks */ = {isa = PBXBuildFile; productRef = 8D5050102FE610460046FDE9 /* MLX */; };
+		8D95BE8C2FDDEDFF00A6B58A /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = 8D95BE8B2FDDEDFF00A6B58A /* WhisperKit */; };
+		8D99E79C2FDFD18D0035B4BB /* SpeakerKit in Frameworks */ = {isa = PBXBuildFile; productRef = 8D99E79B2FDFD18D0035B4BB /* SpeakerKit */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		8D1E42232FECAA1F00C14F06 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8D95BE742FDDEBB300A6B58A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D1E421B2FECAA1F00C14F06;
+			remoteInfo = PrensaLiveCapture;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		8D1E42262FECAA1F00C14F06 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				8D1E42252FECAA1F00C14F06 /* PrensaLiveCapture.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		8D1E421C2FECAA1F00C14F06 /* PrensaLiveCapture.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = PrensaLiveCapture.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1E421D2FECAA1F00C14F06 /* ReplayKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ReplayKit.framework; path = System/Library/Frameworks/ReplayKit.framework; sourceTree = SDKROOT; };
+		8D95BE7C2FDDEBB300A6B58A /* PrensaIA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PrensaIA.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		8D1E422A2FECAA1F00C14F06 /* Exceptions for "PrensaLiveCapture" folder in "PrensaLiveCapture" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 8D1E421B2FECAA1F00C14F06 /* PrensaLiveCapture */;
+		};
+		8D374D222FE512B400BC78F7 /* Exceptions for "PrensaIA" folder in "PrensaIA" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"openai_whisper-large-v3-v20240930_turbo_632MB/AudioEncoder.mlmodelc",
+				"openai_whisper-large-v3-v20240930_turbo_632MB/config.json",
+				"openai_whisper-large-v3-v20240930_turbo_632MB/generation_config.json",
+				"openai_whisper-large-v3-v20240930_turbo_632MB/MelSpectrogram.mlmodelc",
+				"openai_whisper-large-v3-v20240930_turbo_632MB/TextDecoder.mlmodelc",
+				"openai_whisper-large-v3-v20240930_turbo_632MB/TextDecoderContextPrefill.mlmodelc",
+			);
+			target = 8D95BE7B2FDDEBB300A6B58A /* PrensaIA */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		8D1E421F2FECAA1F00C14F06 /* PrensaLiveCapture */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				8D1E422A2FECAA1F00C14F06 /* Exceptions for "PrensaLiveCapture" folder in "PrensaLiveCapture" target */,
+			);
+			path = PrensaLiveCapture;
+			sourceTree = "<group>";
+		};
+		8D95BE7E2FDDEBB300A6B58A /* PrensaIA */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				8D374D222FE512B400BC78F7 /* Exceptions for "PrensaIA" folder in "PrensaIA" target */,
+			);
+			path = PrensaIA;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8D1E42192FECAA1F00C14F06 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D1E421E2FECAA1F00C14F06 /* ReplayKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8D95BE792FDDEBB300A6B58A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D4840402FE4328A00B2E4A2 /* MLXLMCommon in Frameworks */,
+				8D48404A2FE433B600B2E4A2 /* Tokenizers in Frameworks */,
+				8D48403E2FE4328A00B2E4A2 /* MLXLLM in Frameworks */,
+				8D95BE8C2FDDEDFF00A6B58A /* WhisperKit in Frameworks */,
+				8D5050112FE610460046FDE9 /* MLX in Frameworks */,
+				8D99E79C2FDFD18D0035B4BB /* SpeakerKit in Frameworks */,
+				8D48403C2FE4328A00B2E4A2 /* MLXHuggingFace in Frameworks */,
+				8D4840472FE4334500B2E4A2 /* HuggingFace in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		8D95BE732FDDEBB300A6B58A = {
+			isa = PBXGroup;
+			children = (
+				8D95BE7E2FDDEBB300A6B58A /* PrensaIA */,
+				8D1E421F2FECAA1F00C14F06 /* PrensaLiveCapture */,
+				8D99E79A2FDFD18D0035B4BB /* Frameworks */,
+				8D95BE7D2FDDEBB300A6B58A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		8D95BE7D2FDDEBB300A6B58A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8D95BE7C2FDDEBB300A6B58A /* PrensaIA.app */,
+				8D1E421C2FECAA1F00C14F06 /* PrensaLiveCapture.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8D99E79A2FDFD18D0035B4BB /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				8D1E421D2FECAA1F00C14F06 /* ReplayKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8D1E421B2FECAA1F00C14F06 /* PrensaLiveCapture */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8D1E42292FECAA1F00C14F06 /* Build configuration list for PBXNativeTarget "PrensaLiveCapture" */;
+			buildPhases = (
+				8D1E42182FECAA1F00C14F06 /* Sources */,
+				8D1E42192FECAA1F00C14F06 /* Frameworks */,
+				8D1E421A2FECAA1F00C14F06 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				8D1E421F2FECAA1F00C14F06 /* PrensaLiveCapture */,
+			);
+			name = PrensaLiveCapture;
+			packageProductDependencies = (
+			);
+			productName = PrensaLiveCapture;
+			productReference = 8D1E421C2FECAA1F00C14F06 /* PrensaLiveCapture.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		8D95BE7B2FDDEBB300A6B58A /* PrensaIA */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8D95BE872FDDEBB500A6B58A /* Build configuration list for PBXNativeTarget "PrensaIA" */;
+			buildPhases = (
+				8D95BE782FDDEBB300A6B58A /* Sources */,
+				8D95BE792FDDEBB300A6B58A /* Frameworks */,
+				8D95BE7A2FDDEBB300A6B58A /* Resources */,
+				8D1E42262FECAA1F00C14F06 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8D1E42242FECAA1F00C14F06 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				8D95BE7E2FDDEBB300A6B58A /* PrensaIA */,
+			);
+			name = PrensaIA;
+			packageProductDependencies = (
+				8D95BE8B2FDDEDFF00A6B58A /* WhisperKit */,
+				8D99E79B2FDFD18D0035B4BB /* SpeakerKit */,
+				8D48403B2FE4328A00B2E4A2 /* MLXHuggingFace */,
+				8D48403D2FE4328A00B2E4A2 /* MLXLLM */,
+				8D48403F2FE4328A00B2E4A2 /* MLXLMCommon */,
+				8D4840462FE4334500B2E4A2 /* HuggingFace */,
+				8D4840492FE433B600B2E4A2 /* Tokenizers */,
+				8D5050102FE610460046FDE9 /* MLX */,
+			);
+			productName = PrensaIA;
+			productReference = 8D95BE7C2FDDEBB300A6B58A /* PrensaIA.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		8D95BE742FDDEBB300A6B58A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2650;
+				LastUpgradeCheck = 2650;
+				TargetAttributes = {
+					8D1E421B2FECAA1F00C14F06 = {
+						CreatedOnToolsVersion = 26.5;
+					};
+					8D95BE7B2FDDEBB300A6B58A = {
+						CreatedOnToolsVersion = 26.5;
+					};
+				};
+			};
+			buildConfigurationList = 8D95BE772FDDEBB300A6B58A /* Build configuration list for PBXProject "PrensaIA" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 8D95BE732FDDEBB300A6B58A;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				8D95BE8A2FDDEDFF00A6B58A /* XCRemoteSwiftPackageReference "argmax-oss-swift" */,
+				8D48403A2FE4328A00B2E4A2 /* XCRemoteSwiftPackageReference "mlx-swift-lm" */,
+				8D4840452FE4334500B2E4A2 /* XCRemoteSwiftPackageReference "swift-huggingface" */,
+				8D4840482FE433B600B2E4A2 /* XCRemoteSwiftPackageReference "swift-transformers" */,
+				8D50500F2FE610460046FDE9 /* XCRemoteSwiftPackageReference "mlx-swift" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 8D95BE7D2FDDEBB300A6B58A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8D95BE7B2FDDEBB300A6B58A /* PrensaIA */,
+				8D1E421B2FECAA1F00C14F06 /* PrensaLiveCapture */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8D1E421A2FECAA1F00C14F06 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8D95BE7A2FDDEBB300A6B58A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8D1E42182FECAA1F00C14F06 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8D95BE782FDDEBB300A6B58A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		8D1E42242FECAA1F00C14F06 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8D1E421B2FECAA1F00C14F06 /* PrensaLiveCapture */;
+			targetProxy = 8D1E42232FECAA1F00C14F06 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		8D1E42272FECAA1F00C14F06 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = PrensaLiveCapture/PrensaLiveCapture.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5C25U7933W;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PrensaLiveCapture/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PrensaLiveCapture;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.simonrivas.Prensa.PrensaIA.PrensaLiveCapture;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		8D1E42282FECAA1F00C14F06 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = PrensaLiveCapture/PrensaLiveCapture.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5C25U7933W;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PrensaLiveCapture/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = PrensaLiveCapture;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.simonrivas.Prensa.PrensaIA.PrensaLiveCapture;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		8D95BE852FDDEBB500A6B58A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 5C25U7933W;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		8D95BE862FDDEBB500A6B58A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 5C25U7933W;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		8D95BE882FDDEBB500A6B58A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = PrensaIA/PrensaIA.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5C25U7933W;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "PrensaIA usa el micrófono para grabar audio y transcribirlo.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.simonrivas.Prensa.PrensaIA;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		8D95BE892FDDEBB500A6B58A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = PrensaIA/PrensaIA.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 5C25U7933W;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "PrensaIA usa el micrófono para grabar audio y transcribirlo.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.simonrivas.Prensa.PrensaIA;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		8D1E42292FECAA1F00C14F06 /* Build configuration list for PBXNativeTarget "PrensaLiveCapture" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8D1E42272FECAA1F00C14F06 /* Debug */,
+				8D1E42282FECAA1F00C14F06 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8D95BE772FDDEBB300A6B58A /* Build configuration list for PBXProject "PrensaIA" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8D95BE852FDDEBB500A6B58A /* Debug */,
+				8D95BE862FDDEBB500A6B58A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8D95BE872FDDEBB500A6B58A /* Build configuration list for PBXNativeTarget "PrensaIA" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8D95BE882FDDEBB500A6B58A /* Debug */,
+				8D95BE892FDDEBB500A6B58A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8D48403A2FE4328A00B2E4A2 /* XCRemoteSwiftPackageReference "mlx-swift-lm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ml-explore/mlx-swift-lm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.31.3;
+			};
+		};
+		8D4840452FE4334500B2E4A2 /* XCRemoteSwiftPackageReference "swift-huggingface" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/huggingface/swift-huggingface";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.0;
+			};
+		};
+		8D4840482FE433B600B2E4A2 /* XCRemoteSwiftPackageReference "swift-transformers" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/huggingface/swift-transformers";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.3;
+			};
+		};
+		8D50500F2FE610460046FDE9 /* XCRemoteSwiftPackageReference "mlx-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ml-explore/mlx-swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.31.4;
+			};
+		};
+		8D95BE8A2FDDEDFF00A6B58A /* XCRemoteSwiftPackageReference "argmax-oss-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/argmaxinc/argmax-oss-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8D48403B2FE4328A00B2E4A2 /* MLXHuggingFace */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8D48403A2FE4328A00B2E4A2 /* XCRemoteSwiftPackageReference "mlx-swift-lm" */;
+			productName = MLXHuggingFace;
+		};
+		8D48403D2FE4328A00B2E4A2 /* MLXLLM */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8D48403A2FE4328A00B2E4A2 /* XCRemoteSwiftPackageReference "mlx-swift-lm" */;
+			productName = MLXLLM;
+		};
+		8D48403F2FE4328A00B2E4A2 /* MLXLMCommon */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8D48403A2FE4328A00B2E4A2 /* XCRemoteSwiftPackageReference "mlx-swift-lm" */;
+			productName = MLXLMCommon;
+		};
+		8D4840462FE4334500B2E4A2 /* HuggingFace */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8D4840452FE4334500B2E4A2 /* XCRemoteSwiftPackageReference "swift-huggingface" */;
+			productName = HuggingFace;
+		};
+		8D4840492FE433B600B2E4A2 /* Tokenizers */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8D4840482FE433B600B2E4A2 /* XCRemoteSwiftPackageReference "swift-transformers" */;
+			productName = Tokenizers;
+		};
+		8D5050102FE610460046FDE9 /* MLX */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8D50500F2FE610460046FDE9 /* XCRemoteSwiftPackageReference "mlx-swift" */;
+			productName = MLX;
+		};
+		8D95BE8B2FDDEDFF00A6B58A /* WhisperKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8D95BE8A2FDDEDFF00A6B58A /* XCRemoteSwiftPackageReference "argmax-oss-swift" */;
+			productName = WhisperKit;
+		};
+		8D99E79B2FDFD18D0035B4BB /* SpeakerKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8D95BE8A2FDDEDFF00A6B58A /* XCRemoteSwiftPackageReference "argmax-oss-swift" */;
+			productName = SpeakerKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 8D95BE742FDDEBB300A6B58A /* Project object */;
+}
