@@ -92,9 +92,14 @@ extension ContentView {
             }
             return (.secondary, "arrow.down.circle", "Motor Rápido: sin descargar", false, nil)
         } else {
-            return service.whisperReady
-                ? (.green, "checkmark.circle.fill", "Listo para transcribir", false, nil)
-                : (.orange, "circle.fill", "Preparando el motor…", true, nil)
+            if service.whisperReady {
+                return (.green, "checkmark.circle.fill", "Listo para transcribir", false, nil)
+            }
+            let dl = service.whisperDownloadProgress
+            if dl > 0 && dl < 1 {
+                return (.orange, "arrow.down.circle", "Descargando motor (solo una vez)", true, Int(dl * 100))
+            }
+            return (.orange, "circle.fill", "Preparando el motor…", true, nil)
         }
     }
 

@@ -55,6 +55,7 @@ final class TranscriptionService {
     var currentSavedID: UUID?
     var diarizationEnabled: Bool = false
     private(set) var whisperReady = false   // motor Preciso precalentado y listo
+    private(set) var whisperDownloadProgress: Double = 0   // 0<..<1 solo mientras descarga la 1ª vez
     var expectedSpeakers: Int = 0
     var speakerNames: [Int: String] = [:]
     var corrections: [Correccion] = []
@@ -174,18 +175,28 @@ final class TranscriptionService {
                     load: true
                 ))
             }
-            // Si no hay copia local (primera vez), descargar y guardar la ruta para la próxima.
+            // Si no hay copia local (primera vez, o tras reinstalar), descargar
+            // el modelo CON PROGRESO visible y luego cargarlo desde la carpeta
+            // (guardando la ruta para no volver a bajarlo).
             if self.whisperKit == nil {
-                let wk = try? await WhisperKit(WhisperKitConfig(
-                    model: modelName,
-                    prewarm: true,
-                    load: true,
-                    download: true
-                ))
-                self.whisperKit = wk
-                if let folder = wk?.modelFolder?.path {
-                    UserDefaults.standard.set(folder, forKey: key)
+                let folderURL = try? await WhisperKit.download(
+                    variant: modelName,
+                    progressCallback: { [weak self] progress in
+                        Task { @MainActor [weak self] in
+                            self?.whisperDownloadProgress = progress.fractionCompleted
+                        }
+                    }
+                )
+                if let folderURL {
+                    UserDefaults.standard.set(folderURL.path, forKey: key)
+                    self.whisperKit = try? await WhisperKit(WhisperKitConfig(
+                        model: modelName,
+                        modelFolder: folderURL.path,
+                        prewarm: true,
+                        load: true
+                    ))
                 }
+                self.whisperDownloadProgress = 0   // termina: se apaga el indicador
             }
         }
         loadTask = task
