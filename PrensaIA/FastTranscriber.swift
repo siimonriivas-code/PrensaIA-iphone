@@ -25,6 +25,7 @@ final class FastTranscriber {
 
     enum Status: Equatable { case idle, loading, ready, failed }
     private(set) var status: Status = .idle
+    private(set) var downloadProgress: Double = 0
 
     private var manager: AsrManager?
 
@@ -42,7 +43,13 @@ final class FastTranscriber {
         status = .loading
         do {
             // Descarga una sola vez; después carga desde caché (sin internet).
-            let models = try await AsrModels.downloadAndLoad(version: .v3)
+            downloadProgress = 0
+            let models = try await AsrModels.downloadAndLoad(version: .v3) { [weak self] progress in
+                Task { @MainActor [weak self] in
+                    self?.downloadProgress = progress.fractionCompleted
+                }
+            }
+            downloadProgress = 1
             let m = AsrManager(config: .default)
             try await m.loadModels(models)
             manager = m

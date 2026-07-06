@@ -341,6 +341,18 @@ extension ContentView {
                         .tint(.brand)
                 }
 
+                // Descarga única del motor Rápido: avance real en pantalla
+                // (antes parecía congelado durante varios minutos).
+                if case .preparingModel = service.phase,
+                   FastTranscriber.shared.status == .loading,
+                   FastTranscriber.shared.downloadProgress > 0,
+                   FastTranscriber.shared.downloadProgress < 1 {
+                    ProgressView(value: FastTranscriber.shared.downloadProgress)
+                        .tint(.brand)
+                    Text("Descargando el motor Rápido (~600 MB, solo esta vez)… \(Int(FastTranscriber.shared.downloadProgress * 100))%")
+                        .font(.caption2).foregroundStyle(.secondary)
+                }
+
                 Text(service.stageSubtitle)
                     .font(.caption).foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)

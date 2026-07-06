@@ -135,13 +135,11 @@ final class TranscriptionService {
 
     // MARK: Carga del modelo (segura para llamarse varias veces)
 
-    func prepareModelIfNeeded(force: Bool = false) async {
-        // Si el usuario eligió el motor Rápido, no cargamos Whisper al arrancar.
-        // force=true lo carga de todas formas (transcripción en vivo y "leer casi
-        // en vivo" funcionan solo con Whisper).
-        if !force, UserDefaults.standard.string(forKey: "prensaia_engine") == "fast" { return }
+    func prepareModelIfNeeded() async {
         if whisperKit != nil { return }
-        // Ley de memoria: nunca dos motores de transcripción cargados a la vez.
+        // Whisper se precalienta al abrir la app: así "en vivo" y las
+        // transcripciones arrancan al instante (como siempre). Si el motor
+        // Rápido estuviera cargado, se libera (ley de memoria: nunca dos).
         FastTranscriber.shared.unload()
         if let loadTask {
             await loadTask.value
@@ -210,7 +208,7 @@ final class TranscriptionService {
         liveDone = false
         liveConfirmed = ""
         liveHypothesis = ""
-        await prepareModelIfNeeded(force: true)
+        await prepareModelIfNeeded()
         guard let whisperKit, let tokenizer = whisperKit.tokenizer else {
             liveStarting = false
             return
@@ -299,7 +297,7 @@ final class TranscriptionService {
         followOffset = 44
         followTask = Task { @MainActor [weak self] in
             guard let self else { return }
-            await self.prepareModelIfNeeded(force: true)
+            await self.prepareModelIfNeeded()
             guard self.whisperKit != nil else {
                 self.followHint = "No se pudo preparar el modelo. Revisa tu internet la primera vez."
                 self.followActive = false
@@ -435,7 +433,7 @@ final class TranscriptionService {
         } else {
             FastTranscriber.shared.unload()
             if whisperKit == nil { phase = .preparingModel }
-            await prepareModelIfNeeded(force: true)
+            await prepareModelIfNeeded()
             guard whisperKit != nil else {
                 phase = .failed("No se pudo preparar el modelo. Conéctate a internet la primera vez e inténtalo de nuevo.")
                 return
@@ -453,10 +451,11 @@ final class TranscriptionService {
             let audioURL = try await audioForTranscription(from: localURL)
             let audioDuration = await durationSeconds(of: audioURL)
 
-            // Audio prácticamente mudo: avisar en vez de transcribir. Whisper
-            // "alucina" texto falso (ej. "Gracias. Gracias.") cuando recibe silencio.
-            let peak = await WaveformLoader.peakAmplitude(url: audioURL)
-            if peak < 0.005 {
+            // Audio prácticamente mudo: avisar en vez de transcribir (Whisper
+            // "alucina" texto falso con silencio). Con voz real esta revisión es
+            // casi instantánea: se detiene al primer sonido encontrado.
+            let audible = await WaveformLoader.hasAudibleContent(url: audioURL)
+            if !audible {
                 try? FileManager.default.removeItem(at: localURL)
                 if audioURL != localURL { try? FileManager.default.removeItem(at: audioURL) }
                 phase = .failed("""

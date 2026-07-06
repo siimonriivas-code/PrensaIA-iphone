@@ -206,10 +206,63 @@ enum WaveformLoader {
         return amplitudes
     }
 
-    /// Nivel máximo REAL del audio (0 = silencio absoluto, 1 = volumen pleno).
-    /// Sirve para detectar capturas en silencio antes de transcribir.
-    static func peakAmplitude(url: URL) async -> Float {
-        await rawAmplitudes(url: url, bars: 240).max() ?? 0
+    /// ¿Tiene sonido audible el archivo? Se detiene EN CUANTO lo encuentra:
+    /// con voz real responde en milisegundos; solo recorre completo un archivo
+    /// mudo (el caso raro que justamente queremos detectar).
+    static func hasAudibleContent(url: URL, threshold: Float = 0.005) async -> Bool {
+        await Task.detached(priority: .userInitiated) {
+            let asset = AVURLAsset(url: url)
+            guard let tracks = try? await asset.loadTracks(withMediaType: .audio),
+                  let track = tracks.first else { return false }
+            return scanForAudible(asset: asset, track: track, threshold: threshold)
+        }.value
+    }
+
+    nonisolated private static func scanForAudible(asset: AVAsset, track: AVAssetTrack, threshold: Float) -> Bool {
+        guard let reader = try? AVAssetReader(asset: asset) else { return false }
+        let settings: [String: Any] = [
+            AVFormatIDKey: kAudioFormatLinearPCM,
+            AVLinearPCMBitDepthKey: 16,
+            AVLinearPCMIsBigEndianKey: false,
+            AVLinearPCMIsFloatKey: false,
+            AVLinearPCMIsNonInterleaved: false
+        ]
+        let output = AVAssetReaderTrackOutput(track: track, outputSettings: settings)
+        output.alwaysCopiesSampleData = false
+        guard reader.canAdd(output) else { return false }
+        reader.add(output)
+        guard reader.startReading() else { return false }
+
+        let limit = Int32(Float(Int16.max) * threshold)
+        var hits = 0   // pide varios samples audibles seguidos: ignora chasquidos sueltos
+        while reader.status == .reading {
+            guard let sbuf = output.copyNextSampleBuffer() else { break }
+            defer { CMSampleBufferInvalidate(sbuf) }
+            guard let block = CMSampleBufferGetDataBuffer(sbuf) else { continue }
+            let length = CMBlockBufferGetDataLength(block)
+            guard length > 0 else { continue }
+            var data = Data(count: length)
+            data.withUnsafeMutableBytes { (raw: UnsafeMutableRawBufferPointer) in
+                if let base = raw.baseAddress {
+                    CMBlockBufferCopyDataBytes(block, atOffset: 0, dataLength: length, destination: base)
+                }
+            }
+            let audible = data.withUnsafeBytes { (raw: UnsafeRawBufferPointer) -> Bool in
+                for v in raw.bindMemory(to: Int16.self) {
+                    let a = v == Int16.min ? Int32(Int16.max) : Int32(abs(v))
+                    if a > limit {
+                        hits += 1
+                        if hits > 200 { return true }
+                    }
+                }
+                return false
+            }
+            if audible {
+                reader.cancelReading()
+                return true
+            }
+        }
+        return false
     }
 
     private static func rawAmplitudes(url: URL, bars: Int) async -> [Float] {
