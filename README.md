@@ -57,7 +57,9 @@ PrensaIA/
 
 1. Requisitos: **Xcode 26+**, iPhone con **iOS 26+** (probado en iPhone 17 Pro Max).
 2. Abrir `PrensaIA.xcodeproj`, seleccionar tu equipo de firma en ambos targets (app y extensión) y dar Play.
-3. **Nota sobre modelos**: el modelo Whisper (~630 MB) está excluido del repositorio por límites de tamaño de GitHub (ver `.gitignore`). No hace falta nada: la app **descarga y cachea los modelos automáticamente** la primera vez que se usan (Whisper, Parakeet, Qwen y oradores). Solo esa primera vez se necesita internet.
+3. **Nota sobre modelos**:
+   - El modelo **Whisper (~630 MB) viene empaquetado en la app** (referencia de carpeta en el target). Vive en `PrensaIA/openai_whisper-large-v3-v20240930_turbo_632MB/` **en disco**, pero está **excluido del repositorio** por el límite de 100 MB/archivo de GitHub (ver `.gitignore`). ⚠️ Por eso, para **compilar tras un clon nuevo** hay que colocar esa carpeta del modelo en su sitio (o pedirla aparte); el dueño ya la tiene localmente.
+   - Los demás modelos (**Parakeet** del motor Rápido, **Qwen** del análisis y el de **oradores**) se **descargan y cachean automáticamente** la primera vez que se usan. Solo esa primera vez necesitan internet.
 
 ## Reglas de memoria (importantes para contribuir)
 
