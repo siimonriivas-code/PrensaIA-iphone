@@ -137,9 +137,34 @@ extension ContentView {
                     }
                     .pickerStyle(.segmented)
                     Text(engineRaw == "fast"
-                         ? "Rápido (Parakeet): transcribe en segundos usando el chip de IA del iPhone. La 1ª vez descarga un modelo (~600 MB, una sola vez). Ojo: la transcripción en vivo y “leer casi en vivo” siguen usando el motor Preciso."
-                         : "Preciso (Whisper): el motor de siempre, máxima calidad de texto. Si un video largo te urge, prueba el Rápido y compara.")
+                         ? "Rápido (Parakeet): transcribe en segundos usando el chip de IA del iPhone. Ojo: la transcripción en vivo y “leer casi en vivo” siguen usando el motor Preciso."
+                         : "Preciso (Whisper): el motor de siempre, máxima calidad de texto. Viene dentro de la app, listo sin descargas. Si un video largo te urge, prueba el Rápido y compara.")
                         .font(.caption2).foregroundStyle(.secondary)
+
+                    // Estado y descarga anticipada del cerebro del motor Rápido.
+                    if fastDownloading {
+                        VStack(alignment: .leading, spacing: 6) {
+                            ProgressView(value: FastTranscriber.shared.downloadProgress)
+                                .tint(.brand)
+                            Text("Descargando… \(Int(FastTranscriber.shared.downloadProgress * 100))%")
+                                .font(.caption2).foregroundStyle(.secondary)
+                        }
+                    } else if FastTranscriber.shared.isDownloaded {
+                        Label("Motor Rápido descargado y listo (funciona sin internet)", systemImage: "checkmark.seal.fill")
+                            .font(.caption).foregroundStyle(.green)
+                    } else {
+                        Button {
+                            fastDownloading = true
+                            Task {
+                                _ = await FastTranscriber.shared.predownload()
+                                fastDownloading = false
+                            }
+                        } label: {
+                            Label("Descargar motor Rápido ahora (~600 MB)", systemImage: "arrow.down.circle")
+                        }
+                        Text("Descárgalo con calma en WiFi para tenerlo listo cuando lo necesites.")
+                            .font(.caption2).foregroundStyle(.secondary)
+                    }
                 }
 
                 Section("Apariencia") {

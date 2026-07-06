@@ -68,6 +68,36 @@ final class FastTranscriber {
         status = .idle
     }
 
+    /// ¿El cerebro del motor Rápido ya está descargado en el teléfono?
+    /// (Para mostrar en Ajustes si hace falta descargarlo o ya está listo offline.)
+    var isDownloaded: Bool {
+        let dir = AsrModels.defaultCacheDirectory(for: .v3)
+        return AsrModels.modelsExist(at: dir, version: .v3)
+    }
+
+    /// Descarga anticipada del modelo (desde Ajustes), para que el usuario lo
+    /// baje con calma en WiFi y no le agarre a media urgencia. Solo descarga;
+    /// no lo deja cargado en memoria (respeta la ley de memoria).
+    @discardableResult
+    func predownload() async -> Bool {
+        if isDownloaded { return true }
+        status = .loading
+        downloadProgress = 0
+        do {
+            _ = try await AsrModels.download(version: .v3) { [weak self] progress in
+                Task { @MainActor [weak self] in
+                    self?.downloadProgress = progress.fractionCompleted
+                }
+            }
+            downloadProgress = 1
+            status = .idle   // descargado pero sin cargar en memoria
+            return true
+        } catch {
+            status = .idle
+            return false
+        }
+    }
+
     /// Transcribe un archivo de audio y devuelve el texto completo más los
     /// segmentos con marcas de tiempo, listos para el pipeline de la app
     /// (pestaña "Por minuto", reproductor, oradores, cortes).

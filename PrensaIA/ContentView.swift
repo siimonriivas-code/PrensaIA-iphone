@@ -67,6 +67,7 @@ struct ContentView: View {
     @State var recordFailed = false
     @AppStorage("prensaia_theme") var themeRaw = "system"
     @AppStorage("prensaia_engine") var engineRaw = "whisper"
+    @State var fastDownloading = false
     @AppStorage("prensaia_onboarded") var hasOnboarded = false
     @State var showOnboarding = false
 
