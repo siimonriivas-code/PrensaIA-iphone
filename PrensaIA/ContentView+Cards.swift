@@ -50,6 +50,54 @@ extension ContentView {
         .padding(.top, 8)
     }
 
+    // MARK: Semáforo de estado del motor (discreto, en la pantalla principal)
+
+    // Muestra de un vistazo si el motor de transcripción está listo, preparándose
+    // o descargándose. Píldora pequeña de vidrio; no estorba.
+    var engineStatusChip: some View {
+        HStack(spacing: 8) {
+            Image(systemName: engineStatus.icon)
+                .font(.caption)
+                .foregroundStyle(engineStatus.color)
+                .symbolEffect(.pulse, isActive: engineStatus.busy && !reduceMotion)
+            Text(engineStatus.text)
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
+            if let pct = engineStatus.percent {
+                Text("\(pct)%")
+                    .font(.caption.monospacedDigit().weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .contentTransition(.numericText())
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .glassEffect(.regular, in: Capsule())
+        .animation(.smooth(duration: 0.3), value: engineStatus.text)
+        .animation(.smooth(duration: 0.3), value: engineStatus.percent)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Estado del motor: \(engineStatus.text)")
+    }
+
+    // (color, icono, texto, ¿ocupado?, porcentaje) según el motor elegido.
+    var engineStatus: (color: Color, icon: String, text: String, busy: Bool, percent: Int?) {
+        if engineRaw == "fast" {
+            let fast = FastTranscriber.shared
+            if fast.status == .loading {
+                let p = Int(fast.downloadProgress * 100)
+                return (.orange, "arrow.down.circle", "Descargando motor Rápido", true, p)
+            }
+            if fast.isReady || fast.isDownloaded {
+                return (.green, "checkmark.circle.fill", "Motor Rápido listo", false, nil)
+            }
+            return (.secondary, "arrow.down.circle", "Motor Rápido: sin descargar", false, nil)
+        } else {
+            return service.whisperReady
+                ? (.green, "checkmark.circle.fill", "Listo para transcribir", false, nil)
+                : (.orange, "circle.fill", "Preparando el motor…", true, nil)
+        }
+    }
+
     // MARK: Acciones
 
     var actionCard: some View {

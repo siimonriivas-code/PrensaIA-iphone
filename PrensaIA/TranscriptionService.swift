@@ -54,6 +54,7 @@ final class TranscriptionService {
     var isVideo: Bool = false
     var currentSavedID: UUID?
     var diarizationEnabled: Bool = false
+    private(set) var whisperReady = false   // motor Preciso precalentado y listo
     var expectedSpeakers: Int = 0
     var speakerNames: [Int: String] = [:]
     var corrections: [Correccion] = []
@@ -136,13 +137,14 @@ final class TranscriptionService {
     // MARK: Carga del modelo (segura para llamarse varias veces)
 
     func prepareModelIfNeeded() async {
-        if whisperKit != nil { return }
+        if whisperKit != nil { whisperReady = true; return }
         // Whisper se precalienta al abrir la app: así "en vivo" y las
         // transcripciones arrancan al instante (como siempre). Si el motor
         // Rápido estuviera cargado, se libera (ley de memoria: nunca dos).
         FastTranscriber.shared.unload()
         if let loadTask {
             await loadTask.value
+            whisperReady = (whisperKit != nil)
             return
         }
         let task = Task { @MainActor [weak self] in
@@ -189,6 +191,7 @@ final class TranscriptionService {
         loadTask = task
         await task.value
         loadTask = nil
+        whisperReady = (whisperKit != nil)
     }
 
     func clearDownloadedModel() {
@@ -198,6 +201,7 @@ final class TranscriptionService {
         }
         UserDefaults.standard.removeObject(forKey: key)
         whisperKit = nil
+        whisperReady = false
     }
 
     // MARK: Transcripción en vivo (tiempo real)
@@ -424,6 +428,7 @@ final class TranscriptionService {
         if useFastEngine {
             // Ley de memoria: descargar Whisper antes de cargar Parakeet.
             whisperKit = nil
+            whisperReady = false
             if !FastTranscriber.shared.isReady { phase = .preparingModel }
             let ok = await FastTranscriber.shared.ensureLoaded()
             guard ok else {
@@ -687,6 +692,7 @@ final class TranscriptionService {
         // y así le dejamos memoria libre a la IA para procesar videos largos sin saturar.
         // Se vuelven a cargar solos la próxima vez que transcribas.
         whisperKit = nil
+        whisperReady = false
         speakerKit = nil
         FastTranscriber.shared.unload()
 

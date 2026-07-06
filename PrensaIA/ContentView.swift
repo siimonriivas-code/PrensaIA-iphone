@@ -112,6 +112,7 @@ struct ContentView: View {
                         progressCard
                             .transition(.opacity.combined(with: .move(edge: .top)))
                     } else {
+                        engineStatusChip
                         actionCard
                     }
                     if service.showsResults {
