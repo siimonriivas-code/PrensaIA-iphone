@@ -66,6 +66,12 @@ final class TranscriptionService {
     var liveDone = false
     var liveConfirmed = ""
     var liveHypothesis = ""
+    // Amortiguador: el callback llega token por token (muchas veces/seg). Guardamos
+    // el texto crudo aquí y refrescamos la pantalla como máx. 5 veces/seg, para no
+    // saturar el hilo principal (esa saturación hacía que el texto solo apareciera al Detener).
+    private var livePendingConfirmed = ""
+    private var livePendingCurrent = ""
+    private var liveFlushScheduled = false
 
     private var whisperKit: WhisperKit?
     private var speakerKit: SpeakerKit?
@@ -223,6 +229,9 @@ final class TranscriptionService {
         liveDone = false
         liveConfirmed = ""
         liveHypothesis = ""
+        livePendingConfirmed = ""
+        livePendingCurrent = ""
+        liveFlushScheduled = false
         await prepareModelIfNeeded()
         guard let whisperKit, let tokenizer = whisperKit.tokenizer else {
             liveStarting = false
@@ -248,9 +257,10 @@ final class TranscriptionService {
             let current = pending.isEmpty ? newState.currentText : pending
             Task { @MainActor [weak self] in
                 guard let self else { return }
-                self.liveConfirmed = self.correctText(self.cleanText(confirmed))
-                let h = self.cleanText(current)
-                self.liveHypothesis = (h == "Waiting for speech...") ? "" : self.correctText(h)
+                // Solo GUARDAMOS el texto crudo (barato) y pedimos un refresco amortiguado.
+                self.livePendingConfirmed = confirmed
+                self.livePendingCurrent = current
+                self.scheduleLiveFlush()
             }
         }
         liveTranscriber = transcriber
@@ -267,11 +277,31 @@ final class TranscriptionService {
         }
     }
 
+    // Refresco amortiguado del texto en vivo: convierte el texto crudo (con la
+    // limpieza y las correcciones, que son costosas) a lo sumo 5 veces por segundo.
+    private func scheduleLiveFlush() {
+        guard !liveFlushScheduled else { return }
+        liveFlushScheduled = true
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: 200_000_000)   // 0.2 s
+            guard let self else { return }
+            self.liveFlushScheduled = false
+            self.flushLiveText()
+        }
+    }
+
+    private func flushLiveText() {
+        liveConfirmed = correctText(cleanText(livePendingConfirmed))
+        let h = cleanText(livePendingCurrent)
+        liveHypothesis = (h == "Waiting for speech...") ? "" : correctText(h)
+    }
+
     func stopLive() async {
         await liveTranscriber?.stopStreamTranscription()
         liveTask = nil
         liveTranscriber = nil
         isLive = false
+        flushLiveText()   // vuelca cualquier texto pendiente del amortiguador
         // Pasa lo "en proceso" a confirmado para no perderlo, y deja el texto en pantalla.
         if !liveHypothesis.isEmpty {
             liveConfirmed = liveFullText
@@ -284,6 +314,8 @@ final class TranscriptionService {
         liveDone = false
         liveConfirmed = ""
         liveHypothesis = ""
+        livePendingConfirmed = ""
+        livePendingCurrent = ""
     }
 
     var liveFullText: String {
