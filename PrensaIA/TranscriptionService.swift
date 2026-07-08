@@ -158,17 +158,32 @@ final class TranscriptionService {
             guard let self else { return }
             let modelName = "large-v3-v20240930_turbo_632MB"
             let key = "prensaia_whisper_folder"
+            let t0 = CFAbsoluteTimeGetCurrent()
+            func mark(_ what: String) {
+                NSLog("PRENSAIA_PERF \(what): %.1f s", CFAbsoluteTimeGetCurrent() - t0)
+            }
             // 0. ¿El modelo viene incluido dentro de la app? -> 100% sin internet.
-            if let bundled = Bundle.main.url(
-                forResource: "openai_whisper-large-v3-v20240930_turbo_632MB",
-                withExtension: nil)?.path,
-               FileManager.default.fileExists(atPath: bundled) {
+            //    Búsqueda ROBUSTA: forResource a veces no resuelve carpetas-referencia,
+            //    así que también probamos directo dentro de los recursos del bundle.
+            let folderName = "openai_whisper-large-v3-v20240930_turbo_632MB"
+            var bundled = Bundle.main.url(forResource: folderName, withExtension: nil)?.path
+            if bundled == nil,
+               let direct = Bundle.main.resourceURL?.appendingPathComponent(folderName).path,
+               FileManager.default.fileExists(atPath: direct) {
+                bundled = direct
+            }
+            NSLog("PRENSAIA_PERF bundle encontrado: \(bundled != nil ? "SÍ" : "NO ❌")")
+            if let bundled, FileManager.default.fileExists(atPath: bundled) {
+                mark("antes de cargar (bundle)")
+                // prewarm: false → carga rápida. El calentamiento se hace solo en la
+                // 1ª transcripción (con su barra de progreso), no en una espera muda.
                 self.whisperKit = try? await WhisperKit(WhisperKitConfig(
                     model: modelName,
                     modelFolder: bundled,
-                    prewarm: true,
+                    prewarm: false,
                     load: true
                 ))
+                mark("modelo cargado (bundle)")
             }
             // Si ya se descargó antes, cargar desde el disco (sin necesidad de internet).
             if self.whisperKit == nil,
@@ -177,7 +192,7 @@ final class TranscriptionService {
                 self.whisperKit = try? await WhisperKit(WhisperKitConfig(
                     model: modelName,
                     modelFolder: saved,
-                    prewarm: true,
+                    prewarm: false,
                     load: true
                 ))
             }
@@ -198,7 +213,7 @@ final class TranscriptionService {
                     self.whisperKit = try? await WhisperKit(WhisperKitConfig(
                         model: modelName,
                         modelFolder: folderURL.path,
-                        prewarm: true,
+                        prewarm: false,
                         load: true
                     ))
                 }
