@@ -271,10 +271,15 @@ final class TranscriptionService {
                 .joined(separator: " ")
             let current = pending.isEmpty ? newState.currentText : pending
             Task { @MainActor [weak self] in
-                guard let self else { return }
-                // Solo GUARDAMOS el texto crudo (barato) y pedimos un refresco amortiguado.
+                // Tras Detener ignoramos todo: nada puede pisar el texto final.
+                guard let self, self.isLive else { return }
                 self.livePendingConfirmed = confirmed
                 self.livePendingCurrent = current
+                // Se ve YA: pintamos el texto CRUDO (asignación barata, sin regex)
+                // en cada actualización para que aparezca mientras se habla…
+                self.liveConfirmed = confirmed
+                self.liveHypothesis = (current == "Waiting for speech...") ? "" : current
+                // …y la limpieza fina (correcciones de nombres) va amortiguada 5x/seg.
                 self.scheduleLiveFlush()
             }
         }
@@ -301,6 +306,9 @@ final class TranscriptionService {
             try? await Task.sleep(nanoseconds: 200_000_000)   // 0.2 s
             guard let self else { return }
             self.liveFlushScheduled = false
+            // Si ya se detuvo, no repintar: stopLive() hizo su volcado final
+            // y un refresco tardío podría pisar el texto en pantalla.
+            guard self.isLive else { return }
             self.flushLiveText()
         }
     }
@@ -309,6 +317,7 @@ final class TranscriptionService {
         liveConfirmed = correctText(cleanText(livePendingConfirmed))
         let h = cleanText(livePendingCurrent)
         liveHypothesis = (h == "Waiting for speech...") ? "" : correctText(h)
+        NSLog("PRENSAIA_LIVE flush conf=%d hip=%d", liveConfirmed.count, liveHypothesis.count)
     }
 
     func stopLive() async {
