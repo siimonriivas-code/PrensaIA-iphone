@@ -275,11 +275,15 @@ final class TranscriptionService {
                 guard let self, self.isLive else { return }
                 self.livePendingConfirmed = confirmed
                 self.livePendingCurrent = current
-                // Se ve YA: pintamos el texto CRUDO (asignación barata, sin regex)
-                // en cada actualización para que aparezca mientras se habla…
-                self.liveConfirmed = confirmed
-                self.liveHypothesis = (current == "Waiting for speech...") ? "" : current
-                // …y la limpieza fina (correcciones de nombres) va amortiguada 5x/seg.
+                // Se ve YA: limpiamos los símbolos internos de Whisper (<|...|>) —
+                // barato, un solo regex— y solo repintamos si el texto cambió, para
+                // no parpadear con cada refresco de energía del micrófono.
+                let newConfirmed = self.cleanText(confirmed)
+                let cleanedCurrent = self.cleanText(current)
+                let newHypothesis = (cleanedCurrent == "Waiting for speech...") ? "" : cleanedCurrent
+                if newConfirmed != self.liveConfirmed { self.liveConfirmed = newConfirmed }
+                if newHypothesis != self.liveHypothesis { self.liveHypothesis = newHypothesis }
+                // La limpieza fina (correcciones de nombres) va amortiguada 5x/seg.
                 self.scheduleLiveFlush()
             }
         }
@@ -314,10 +318,11 @@ final class TranscriptionService {
     }
 
     private func flushLiveText() {
-        liveConfirmed = correctText(cleanText(livePendingConfirmed))
+        let newConfirmed = correctText(cleanText(livePendingConfirmed))
         let h = cleanText(livePendingCurrent)
-        liveHypothesis = (h == "Waiting for speech...") ? "" : correctText(h)
-        NSLog("PRENSAIA_LIVE flush conf=%d hip=%d", liveConfirmed.count, liveHypothesis.count)
+        let newHypothesis = (h == "Waiting for speech...") ? "" : correctText(h)
+        if newConfirmed != liveConfirmed { liveConfirmed = newConfirmed }
+        if newHypothesis != liveHypothesis { liveHypothesis = newHypothesis }
     }
 
     func stopLive() async {

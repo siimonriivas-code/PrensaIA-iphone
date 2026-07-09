@@ -280,15 +280,29 @@ extension ContentView {
                 if service.liveDone { Spacer() }
             }
 
-            ScrollView {
-                Text(liveAttributed)
-                    .font(.system(.body, design: .serif))
-                    .lineSpacing(5)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .textSelection(.enabled)
-                    .padding(.vertical, 4)
+            ScrollViewReader { proxy in
+                ScrollView {
+                    Text(liveAttributed)
+                        .font(.system(.body, design: .serif))
+                        .lineSpacing(5)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .textSelection(.enabled)
+                        .padding(.vertical, 4)
+                    // Ancla invisible al final para el auto-scroll.
+                    Color.clear.frame(height: 1).id("liveBottom")
+                }
+                // Altura FIJA: la tarjeta ya no crece ni "salta" al llegar texto.
+                .frame(height: 240)
+                .onChange(of: service.liveFullText) { _, _ in
+                    if reduceMotion {
+                        proxy.scrollTo("liveBottom", anchor: .bottom)
+                    } else {
+                        withAnimation(.easeOut(duration: 0.15)) {
+                            proxy.scrollTo("liveBottom", anchor: .bottom)
+                        }
+                    }
+                }
             }
-            .frame(minHeight: 140, maxHeight: 260)
 
             if service.liveStarting {
                 Text("Despertando el modelo… habla en un momento.")
