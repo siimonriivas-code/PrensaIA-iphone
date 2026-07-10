@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PrensaIA — Liquid Glass</title>
+<link rel="stylesheet" href="assets/pl-tokens.css">
+<style>
+  * { -webkit-font-smoothing: antialiased; box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #E7DFD8; font-family: var(--font-display); }
+  #root { width: 100%; }
+  button { font-family: inherit; border: none; background: none; padding: 0; cursor: pointer; color: inherit; }
+  input { font-family: inherit; }
+  a { color: #611029; } a:hover { color: #B02A5B; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+  .lg-scroll { overscroll-behavior: contain; }
+
+  /* ── Liquid Glass material (simulated — no backdrop-filter; it misalign-samples
+     inside the scaled device frame in Chromium) ── */
+  .glass {
+    position: relative;
+    background: var(--gbg);
+    box-shadow: var(--gshadow);
+  }
+  /* refractive edge ring */
+  .glass::before {
+    content: ""; position: absolute; inset: 0; border-radius: inherit;
+    padding: 1.2px; background: var(--gedge);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    pointer-events: none;
+  }
+  /* specular sheen */
+  .glass::after {
+    content: ""; position: absolute; inset: 0; border-radius: inherit;
+    background: radial-gradient(130% 70% at 16% 0%, rgba(255,255,255,0.22), transparent 46%);
+    pointer-events: none;
+  }
+
+  .press { transition: transform 0.16s ease; }
+  .press:active { transform: scale(0.96); }
+
+  @keyframes pl-spin { to { transform: rotate(360deg); } }
+  .pl-spin { animation: pl-spin 0.8s linear infinite; }
+  @keyframes pl-ring-spin { to { transform: rotate(360deg); } }
+  .pl-ring-spin { animation: pl-ring-spin 1.1s linear infinite; transform-origin: center; }
+  @keyframes pl-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+  .pl-pulse { animation: pl-pulse 1.1s ease-in-out infinite; }
+  @keyframes pl-caret { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+  .pl-caret { animation: pl-caret 1s step-end infinite; }
+  @keyframes lg-wave { 0%,100% { transform: scaleY(0.22); } 50% { transform: scaleY(1); } }
+  .lg-wavebar { animation: lg-wave 1.05s ease-in-out infinite; transform-origin: center; }
+
+  @keyframes lg-push { from { transform: translateX(26px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  .lg-push { animation: lg-push 0.3s cubic-bezier(0.32,0.72,0,1) both; }
+  @keyframes lg-pop { from { transform: translateY(14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .lg-pop { animation: lg-pop 0.28s cubic-bezier(0.32,0.72,0,1) both; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lg-push, .lg-pop, .lg-wavebar, .pl-pulse, .pl-caret { animation-duration: 0.001s; animation-iteration-count: 1; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#611029"/>
+    <rect x="30" y="30" width="40" height="40" rx="12" fill="rgba(255,255,255,0.25)" stroke="rgba(255,255,255,0.7)"/>
+    <text x="50" y="58" font-family="Montserrat, sans-serif" font-size="18" font-weight="900" fill="#fff" text-anchor="middle">PL</text>
+  </svg>
+</template>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="app/prensaia-data.jsx"></script>
+<script type="text/babel" src="app2/lg-ui.jsx"></script>
+<script type="text/babel" src="app2/lg-home.jsx"></script>
+<script type="text/babel" src="app2/lg-results.jsx"></script>
+<script type="text/babel" src="app2/lg-library.jsx"></script>
+<script type="text/babel" src="app2/lg-app.jsx"></script>
+</body>
+</html>

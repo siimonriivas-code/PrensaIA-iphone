@@ -13,6 +13,11 @@ struct PrensaIAApp: App {
     // Se aplica aquí, en la raíz, para que cubra TODA la app (incluidas las hojas).
     @AppStorage("prensaia_theme") private var themeRaw = "system"
 
+    init() {
+        // Fuentes de marca (Montserrat + Playfair Display) antes de dibujar nada.
+        PLFonts.registerAll()
+    }
+
     private var colorScheme: ColorScheme? {
         switch themeRaw {
         case "light": return .light

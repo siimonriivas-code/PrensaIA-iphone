@@ -78,19 +78,11 @@ struct ContentView: View {
         case cortes = "Cortes"
     }
 
-    // Colores por orador (se repiten si hay más de 7)
-    let speakerPalette: [Color] = [
-        Color(red: 0.357, green: 0.310, blue: 0.878),
-        Color(red: 0.93, green: 0.42, blue: 0.20),
-        Color(red: 0.16, green: 0.61, blue: 0.45),
-        Color(red: 0.85, green: 0.26, blue: 0.50),
-        Color(red: 0.18, green: 0.52, blue: 0.83),
-        Color(red: 0.74, green: 0.53, blue: 0.13),
-        Color(red: 0.49, green: 0.40, blue: 0.74)
-    ]
+    // Colores por orador (rotación de 7, adaptativos claro/oscuro — identidad PL)
+    @Environment(\.colorScheme) var colorScheme
 
     func speakerColor(_ id: Int) -> Color {
-        speakerPalette[((id % speakerPalette.count) + speakerPalette.count) % speakerPalette.count]
+        Color.speaker(id, dark: colorScheme == .dark)
     }
 
     func speakerName(_ id: Int) -> String {
