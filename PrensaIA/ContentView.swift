@@ -45,6 +45,8 @@ struct ContentView: View {
     @State var photoItem: PhotosPickerItem?
     @State var tab: ResultTab = .transcript
     @State var isEditing = false
+    @State var showResults = false
+    @Namespace var segmentedNS
     @State var history = HistoryStore()
     @State var selectedTab: AppTab = .inicio
     @State var liveCapture = LiveCaptureController()
@@ -127,9 +129,33 @@ struct ContentView: View {
                     } else {
                         homeActions
                     }
-                    if service.showsResults {
-                        resultsCard
-                            .transition(.opacity)
+                    if service.showsResults && !showResults {
+                        // Acceso rápido al resultado abierto (la pantalla es push).
+                        Button {
+                            showResults = true
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "doc.text")
+                                    .font(.system(size: 19, weight: .semibold))
+                                    .foregroundStyle(.brandText)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Ver transcripción")
+                                        .font(.display(14.5, .bold))
+                                        .foregroundStyle(.textPrimary)
+                                    Text(displayTitle)
+                                        .font(.serifItalic(12.5, .regular))
+                                        .foregroundStyle(.textTertiary)
+                                        .lineLimit(1)
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundStyle(.textTertiary)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .card(radius: 22, padding: 16)
+                        .transition(.opacity)
                     }
                 }
                 .padding(.horizontal, 18)
@@ -192,6 +218,7 @@ struct ContentView: View {
                 if case .finished = newPhase {
                     UINotificationFeedbackGenerator().notificationOccurred(.success)
                     saveCurrentToHistory()
+                    if service.showsResults { showResults = true }
                 } else if case .failed = newPhase {
                     UINotificationFeedbackGenerator().notificationOccurred(.error)
                 }
@@ -202,6 +229,9 @@ struct ContentView: View {
                 }
             }
             .toolbarVisibility(.hidden, for: .navigationBar)
+            .navigationDestination(isPresented: $showResults) {
+                resultsScreen
+            }
             .sheet(isPresented: $showLiveCapture) {
                 liveCaptureSheet
             }
@@ -285,84 +315,6 @@ struct ContentView: View {
         return String(t.prefix(46)) + (t.count > 46 ? "…" : "")
     }
 
-    var resultsCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack(alignment: .top, spacing: 12) {
-                Text(displayTitle)
-                    .font(.system(.headline, design: .serif))
-                    .lineLimit(2)
-                Spacer()
-                if isEditing {
-                    Button("Listo") { finishEditing() }
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(.brand)
-                } else {
-                    HStack(spacing: 16) {
-                        ShareLink(item: exportForCurrentTab()) {
-                            Image(systemName: "square.and.arrow.up")
-                                .font(.title3).foregroundStyle(.brand)
-                        }
-                        .accessibilityLabel("Compartir esta pestaña")
-                        Menu {
-                            if !service.segments.isEmpty {
-                                Button { startEditing() } label: {
-                                    Label("Editar transcripción", systemImage: "pencil")
-                                }
-                            }
-                            Button {
-                                UIPasteboard.general.string = exportForCurrentTab()
-                            } label: {
-                                Label("Copiar esta pestaña", systemImage: "doc.on.doc")
-                            }
-                            Button {
-                                if let url = exportPDF() {
-                                    pdfURL = url
-                                    showPDFShare = true
-                                } else {
-                                    pdfExportFailed = true
-                                }
-                            } label: {
-                                Label("Exportar a PDF", systemImage: "doc.richtext")
-                            }
-                        } label: {
-                            Image(systemName: "ellipsis.circle")
-                                .font(.title3).foregroundStyle(.brand)
-                        }
-                        .accessibilityLabel("Más opciones")
-                    }
-                }
-            }
-
-            if isEditing {
-                editingView
-            } else {
-                segmentedControl
-                switch tab {
-                case .transcript: transcriptView
-                case .estenografica: estenograficaView
-                case .analysis: analysisView
-                case .cortes: cortesView
-                }
-            }
-        }
-        .card()
-        .animation(.smooth(duration: 0.25), value: tab)
-        .animation(.smooth(duration: 0.25), value: isEditing)
-        .sheet(isPresented: $showPDFShare) {
-            if let pdfURL {
-                ActivityView(items: [pdfURL])
-            }
-        }
-        .sheet(isPresented: $showClipShare) {
-            ActivityView(items: exportedClipURLs)
-        }
-        .alert("No se pudieron exportar los cortes", isPresented: $clipExportFailed) {
-            Button("Entendido", role: .cancel) {}
-        } message: {
-            Text("Revisa que el archivo original siga disponible e inténtalo de nuevo.")
-        }
-    }
-
     func startEditing() {
         tab = .transcript
         isEditing = true
@@ -425,6 +377,7 @@ struct ContentView: View {
         service.isVideo = item.isVideo ?? Self.looksLikeVideo(item.audioFileName)
         service.playbackURL = history.audioURL(for: item)
         selectedTab = .inicio
+        showResults = true
     }
 
     // Para historial viejo sin la bandera: deduce por la extensión del archivo.

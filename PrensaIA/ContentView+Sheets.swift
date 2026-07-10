@@ -219,41 +219,4 @@ extension ContentView {
         }
     }
 
-    var segmentedControl: some View {
-        HStack(spacing: 4) {
-            ForEach(ResultTab.allCases, id: \.self) { t in
-                Button {
-                    withAnimation(.smooth(duration: 0.25)) { tab = t }
-                } label: {
-                    HStack(spacing: 5) {
-                        Text(t.rawValue)
-                            .font(.footnote.weight(.semibold))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.75)
-                        if t == .analysis, service.analysisState == .running {
-                            ProgressView().controlSize(.mini)
-                        }
-                        if t == .cortes, service.blocksState == .running {
-                            ProgressView().controlSize(.mini)
-                        }
-                    }
-                    .foregroundStyle(tab == t ? .white : .secondary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 9)
-                    .padding(.horizontal, 4)
-                    .background {
-                        if tab == t {
-                            // Píldora de cristal líquido entintado (iOS 26).
-                            Color.clear
-                                .glassEffect(.regular.tint(.brand).interactive(),
-                                             in: Capsule())
-                        }
-                    }
-                }
-                .buttonStyle(.plain)
-            }
-        }
-        .padding(4)
-        .background(.ultraThinMaterial, in: Capsule())
-    }
 }
