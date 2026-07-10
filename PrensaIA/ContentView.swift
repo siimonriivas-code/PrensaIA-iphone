@@ -46,7 +46,7 @@ struct ContentView: View {
     @State var tab: ResultTab = .transcript
     @State var isEditing = false
     @State var history = HistoryStore()
-    @State var showHistory = false
+    @State var selectedTab: AppTab = .inicio
     @State var liveCapture = LiveCaptureController()
     @State var showLiveCapture = false
     @State var renamingSpeakerId: Int?
@@ -59,7 +59,6 @@ struct ContentView: View {
     @State var pdfURL: URL?
     @State var showPDFShare = false
     @State var diccionario = DiccionarioStore()
-    @State var showDiccionario = false
     @State var nuevoMal = ""
     @State var nuevoBien = ""
     @Environment(\.accessibilityReduceMotion) var reduceMotion
@@ -78,6 +77,11 @@ struct ContentView: View {
         case cortes = "Cortes"
     }
 
+    // Pestañas raíz de la app (TabView nativo iOS 26).
+    enum AppTab: Hashable {
+        case inicio, historial, diccionario
+    }
+
     // Colores por orador (rotación de 7, adaptativos claro/oscuro — identidad PL)
     @Environment(\.colorScheme) var colorScheme
 
@@ -90,6 +94,23 @@ struct ContentView: View {
     }
 
     var body: some View {
+        // TabView nativo de iOS 26: vidrio flotante que se minimiza al scrollear.
+        TabView(selection: $selectedTab) {
+            Tab("Inicio", systemImage: "house", value: AppTab.inicio) {
+                homeTab
+            }
+            Tab("Historial", systemImage: "clock.arrow.circlepath", value: AppTab.historial) {
+                historyTab
+            }
+            Tab("Diccionario", systemImage: "character.book.closed", value: AppTab.diccionario) {
+                dictionaryTab
+            }
+        }
+        .tabBarMinimizeBehavior(.onScrollDown)
+        .tint(.brand)
+    }
+
+    var homeTab: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 18) {
@@ -182,14 +203,6 @@ struct ContentView: View {
                 }
             }
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        showDiccionario = true
-                    } label: {
-                        Image(systemName: "character.book.closed")
-                    }
-                    .accessibilityLabel("Diccionario de correcciones")
-                }
                 ToolbarItem(placement: .topBarTrailing) {
                     // Selector de tema: sistema / claro / oscuro, a un toque.
                     Menu {
@@ -205,20 +218,6 @@ struct ContentView: View {
                     }
                     .accessibilityLabel("Cambiar entre modo claro y oscuro")
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showHistory = true
-                    } label: {
-                        Image(systemName: "clock.arrow.circlepath")
-                    }
-                    .accessibilityLabel("Historial de transcripciones")
-                }
-            }
-            .sheet(isPresented: $showDiccionario) {
-                diccionarioSheet
-            }
-            .sheet(isPresented: $showHistory) {
-                historySheet
             }
             .sheet(isPresented: $showLiveCapture) {
                 liveCaptureSheet
@@ -250,7 +249,6 @@ struct ContentView: View {
                 Text("Se aplicará a todas sus intervenciones en la transcripción.")
             }
         }
-        .tint(.brand)
     }
 
     func startRename(_ id: Int) {
@@ -443,7 +441,7 @@ struct ContentView: View {
         service.phase = .finished
         service.isVideo = item.isVideo ?? Self.looksLikeVideo(item.audioFileName)
         service.playbackURL = history.audioURL(for: item)
-        showHistory = false
+        selectedTab = .inicio
     }
 
     // Para historial viejo sin la bandera: deduce por la extensión del archivo.

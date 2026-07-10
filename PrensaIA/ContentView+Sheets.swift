@@ -2,14 +2,14 @@
 //  ContentView+Sheets.swift
 //  PrensaIA
 //
-//  Hojas de diccionario e historial, edición y selector de pestañas.
+//  Pestañas de Diccionario e Historial, edición y selector de pestañas.
 //
 
 import SwiftUI
 
 extension ContentView {
 
-    var diccionarioSheet: some View {
+    var dictionaryTab: some View {
         NavigationStack {
             List {
                 Section {
@@ -58,16 +58,10 @@ extension ContentView {
             .scrollContentBackground(.hidden)
             .background { AppBackdrop() }
             .navigationTitle("Diccionario")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Cerrar") { showDiccionario = false }
-                }
-            }
         }
     }
 
-    var historySheet: some View {
+    var historyTab: some View {
         NavigationStack {
             List {
                 if history.items.isEmpty {
@@ -137,7 +131,7 @@ extension ContentView {
                     }
                     .pickerStyle(.segmented)
                     Text(engineRaw == "fast"
-                         ? "Rápido (Parakeet): transcribe en segundos usando el chip de IA del iPhone. Ojo: la transcripción en vivo y “leer casi en vivo” siguen usando el motor Preciso."
+                         ? "Rápido (Parakeet): transcribe en segundos usando el chip de IA del iPhone. También hace la transcripción en vivo en tiempo real."
                          : "Preciso (Whisper): el motor de siempre, máxima calidad de texto. Viene dentro de la app, listo sin descargas. Si un video largo te urge, prueba el Rápido y compara.")
                         .font(.caption2).foregroundStyle(.secondary)
 
@@ -179,16 +173,12 @@ extension ContentView {
             .scrollContentBackground(.hidden)
             .background { AppBackdrop() }
             .navigationTitle("Historial")
-            .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $historySearch, prompt: "Buscar en transcripciones")
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
+                ToolbarItem(placement: .topBarTrailing) {
                     if !history.items.isEmpty {
                         EditButton()
                     }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Cerrar") { showHistory = false }
                 }
             }
         }
