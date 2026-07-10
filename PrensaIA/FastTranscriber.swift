@@ -15,6 +15,7 @@
 //
 
 import Foundation
+import AVFoundation
 import FluidAudio
 
 @MainActor
@@ -66,6 +67,122 @@ final class FastTranscriber {
     func unload() {
         manager = nil
         status = .idle
+    }
+
+    // MARK: - Transcripción EN VIVO (tiempo real, Parakeet)
+    //
+    // Parakeet trae streaming de verdad (SlidingWindowAsrManager, estilo
+    // SpeechAnalyzer de Apple): entrega texto "provisional" (volatile) en ~1-2 s
+    // y lo va "confirmando" cuando junta suficiente contexto. Todo en el Neural
+    // Engine. Nosotros capturamos el micrófono con AVAudioEngine y le pasamos el
+    // audio; el manager devuelve actualizaciones que la app pinta en pantalla.
+
+    private var liveManager: SlidingWindowAsrManager?
+    private var liveEngine: AVAudioEngine?
+    private var liveFeedTask: Task<Void, Never>?
+    private var liveUpdatesTask: Task<Void, Never>?
+    private var liveMicContinuation: AsyncStream<AVAudioPCMBuffer>.Continuation?
+
+    /// Arranca el dictado en vivo con Parakeet.
+    /// - Parameter onUpdate: se llama en el hilo principal por cada actualización:
+    ///   `(texto, esConfirmado)`. Confirmado = pedazo estable (acumúlalo);
+    ///   no confirmado = hipótesis provisional (reemplázala).
+    func startLiveStream(onUpdate: @escaping @MainActor (String, Bool) -> Void) async throws {
+        // Ley de memoria: soltar el motor de archivos antes de abrir el de streaming.
+        manager = nil
+
+        // Cargar Parakeet (descarga sólo la 1ª vez; luego desde caché, sin internet).
+        let mgr = SlidingWindowAsrManager(config: .streaming)
+        let models = try await AsrModels.downloadAndLoad(version: .v3)
+        try await mgr.loadModels(models)
+        try await mgr.startStreaming(source: .microphone)
+        liveManager = mgr
+        status = .ready
+
+        // Consumir las actualizaciones del motor y avisarle a la app.
+        liveUpdatesTask = Task { [weak self] in
+            for await update in await mgr.transcriptionUpdates {
+                if Task.isCancelled { break }
+                onUpdate(update.text, update.isConfirmed)
+            }
+            _ = self
+        }
+
+        // Puente micrófono → motor: un AsyncStream serializa los buffers en orden.
+        let (micStream, micCont) = AsyncStream<AVAudioPCMBuffer>.makeStream()
+        liveMicContinuation = micCont
+        liveFeedTask = Task {
+            for await buffer in micStream {
+                await mgr.streamAudio(buffer)
+            }
+        }
+
+        // Sesión de audio para grabar. Modo .measurement = audio crudo sin
+        // procesamiento del sistema (mejor para reconocimiento). Sin opciones de
+        // Bluetooth: usa el micrófono del iPhone (ideal para captar a la persona
+        // entrevistada, no el del audífono, que es solo de escucha).
+        let session = AVAudioSession.sharedInstance()
+        try session.setCategory(.record, mode: .measurement)
+        try session.setActive(true)
+
+        let engine = AVAudioEngine()
+        let input = engine.inputNode
+        let format = input.outputFormat(forBus: 0)
+        input.installTap(onBus: 0, bufferSize: 4096, format: format) { buffer, _ in
+            // El tap reutiliza el buffer: hay que copiarlo antes de encolarlo.
+            if let copy = Self.copyBuffer(buffer) {
+                micCont.yield(copy)
+            }
+        }
+        engine.prepare()
+        try engine.start()
+        liveEngine = engine
+    }
+
+    /// Detiene el dictado en vivo y devuelve el texto final completo.
+    func stopLiveStream() async -> String {
+        liveEngine?.inputNode.removeTap(onBus: 0)
+        liveEngine?.stop()
+        liveEngine = nil
+
+        // Cerrar la entrada de audio y ESPERAR a que los últimos buffers capturados
+        // lleguen al motor, para no cortar la última palabra.
+        liveMicContinuation?.finish()
+        liveMicContinuation = nil
+        await liveFeedTask?.value
+        liveFeedTask = nil
+
+        // finish() procesa lo pendiente y devuelve la transcripción completa.
+        var finalText = ""
+        if let mgr = liveManager {
+            finalText = (try? await mgr.finish()) ?? ""
+        }
+
+        liveUpdatesTask?.cancel()
+        liveUpdatesTask = nil
+        liveManager = nil
+        status = .idle
+
+        try? AVAudioSession.sharedInstance().setActive(false, options: [.notifyOthersOnDeactivation])
+        return finalText
+    }
+
+    /// Copia profunda de un buffer de audio (el tap del micrófono lo reutiliza).
+    nonisolated private static func copyBuffer(_ b: AVAudioPCMBuffer) -> AVAudioPCMBuffer? {
+        guard let copy = AVAudioPCMBuffer(pcmFormat: b.format, frameCapacity: b.frameCapacity) else {
+            return nil
+        }
+        copy.frameLength = b.frameLength
+        let channels = Int(b.format.channelCount)
+        let frames = Int(b.frameLength)
+        if let src = b.floatChannelData, let dst = copy.floatChannelData {
+            for ch in 0..<channels { memcpy(dst[ch], src[ch], frames * MemoryLayout<Float>.size) }
+        } else if let src = b.int16ChannelData, let dst = copy.int16ChannelData {
+            for ch in 0..<channels { memcpy(dst[ch], src[ch], frames * MemoryLayout<Int16>.size) }
+        } else if let src = b.int32ChannelData, let dst = copy.int32ChannelData {
+            for ch in 0..<channels { memcpy(dst[ch], src[ch], frames * MemoryLayout<Int32>.size) }
+        }
+        return copy
     }
 
     /// ¿El cerebro del motor Rápido ya está descargado en el teléfono?

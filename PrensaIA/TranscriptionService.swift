@@ -72,6 +72,7 @@ final class TranscriptionService {
     private var livePendingConfirmed = ""
     private var livePendingCurrent = ""
     private var liveFlushScheduled = false
+    private var liveUsesFast = false   // el vivo actual corre con Parakeet (no Whisper)
 
     private var whisperKit: WhisperKit?
     private var speakerKit: SpeakerKit?
@@ -247,6 +248,56 @@ final class TranscriptionService {
         livePendingConfirmed = ""
         livePendingCurrent = ""
         liveFlushScheduled = false
+
+        // El selector de motor (Historial → Motor) manda también en el vivo:
+        //  · Rápido  → Parakeet en tiempo real (Neural Engine, más ágil)
+        //  · Preciso → Whisper (máxima fidelidad para citas)
+        let useFast = UserDefaults.standard.string(forKey: "prensaia_engine") == "fast"
+        liveUsesFast = useFast
+        if useFast {
+            await startLiveFast()
+        } else {
+            await startLiveWhisper()
+        }
+    }
+
+    // MARK: En vivo con Parakeet (tiempo real)
+
+    private func startLiveFast() async {
+        // Ley de memoria: soltar Whisper antes de encender Parakeet.
+        whisperKit = nil
+        whisperReady = false
+        do {
+            try await FastTranscriber.shared.startLiveStream { [weak self] text, isConfirmed in
+                guard let self, self.isLive || self.liveStarting else { return }
+                if isConfirmed {
+                    // Pedazo estable: se acumula (en negro).
+                    let piece = self.correctText(text.trimmingCharacters(in: .whitespaces))
+                    if !piece.isEmpty {
+                        self.liveConfirmed = self.liveConfirmed.isEmpty
+                            ? piece : self.liveConfirmed + " " + piece
+                    }
+                    self.liveHypothesis = ""
+                } else {
+                    // Hipótesis provisional: reemplaza (en gris).
+                    self.liveHypothesis = text.trimmingCharacters(in: .whitespaces)
+                }
+            }
+            isLive = true
+            liveStarting = false
+        } catch {
+            // Si Parakeet no está listo (sin descargar y sin internet), no dejamos
+            // al usuario sin nada: limpiamos lo que se haya montado y caemos al
+            // motor Preciso (Whisper, ya empaquetado en la app).
+            _ = await FastTranscriber.shared.stopLiveStream()
+            liveUsesFast = false
+            await startLiveWhisper()
+        }
+    }
+
+    // MARK: En vivo con Whisper (preciso)
+
+    private func startLiveWhisper() async {
         await prepareModelIfNeeded()
         guard let whisperKit, let tokenizer = whisperKit.tokenizer else {
             liveStarting = false
@@ -326,6 +377,18 @@ final class TranscriptionService {
     }
 
     func stopLive() async {
+        if liveUsesFast {
+            // Motor Rápido (Parakeet): finish() devuelve el texto completo.
+            let finalText = await FastTranscriber.shared.stopLiveStream()
+            isLive = false
+            let clean = finalText.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !clean.isEmpty { liveConfirmed = correctText(clean) }
+            liveHypothesis = ""
+            liveDone = !liveConfirmed.isEmpty
+            FastTranscriber.shared.unload()   // ley de memoria
+            liveUsesFast = false
+            return
+        }
         await liveTranscriber?.stopStreamTranscription()
         liveTask = nil
         liveTranscriber = nil
