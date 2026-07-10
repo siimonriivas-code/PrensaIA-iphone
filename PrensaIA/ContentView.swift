@@ -114,7 +114,7 @@ struct ContentView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 18) {
-                    header
+                    homeHeader
                     if service.isLive || service.liveStarting || service.liveDone {
                         liveCard
                             .transition(.opacity.combined(with: .move(edge: .top)))
@@ -125,8 +125,7 @@ struct ContentView: View {
                         progressCard
                             .transition(.opacity.combined(with: .move(edge: .top)))
                     } else {
-                        engineStatusChip
-                        actionCard
+                        homeActions
                     }
                     if service.showsResults {
                         resultsCard
@@ -202,23 +201,7 @@ struct ContentView: View {
                     history.updateAnalysis(id: id, analysis: a)
                 }
             }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    // Selector de tema: sistema / claro / oscuro, a un toque.
-                    Menu {
-                        Picker("Tema", selection: $themeRaw) {
-                            Label("Sistema", systemImage: "circle.lefthalf.filled").tag("system")
-                            Label("Claro", systemImage: "sun.max").tag("light")
-                            Label("Oscuro", systemImage: "moon").tag("dark")
-                        }
-                    } label: {
-                        Image(systemName: themeRaw == "dark" ? "moon.fill"
-                              : (themeRaw == "light" ? "sun.max.fill" : "circle.lefthalf.filled"))
-                            .contentTransition(.symbolEffect(.replace))
-                    }
-                    .accessibilityLabel("Cambiar entre modo claro y oscuro")
-                }
-            }
+            .toolbarVisibility(.hidden, for: .navigationBar)
             .sheet(isPresented: $showLiveCapture) {
                 liveCaptureSheet
             }

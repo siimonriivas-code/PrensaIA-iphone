@@ -11,43 +11,40 @@ import UIKit
 
 extension ContentView {
 
-    // MARK: Cabecera (marca)
+    // MARK: Cabecera (identidad PL)
 
-    // Cabezal editorial: ícono con degradado (late cuando trabaja) + lema tipo periódico.
-    var header: some View {
-        VStack(spacing: 14) {
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(LinearGradient.brand)
-                .frame(width: 64, height: 64)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .strokeBorder(.white.opacity(0.2), lineWidth: 1)
-                }
-                .overlay {
-                    Image(systemName: "waveform")
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundStyle(.white)
-                        .symbolEffect(.variableColor.iterative,
-                                      isActive: service.isBusy || service.isLive)
-                }
-                .shadow(color: .brand.opacity(0.4), radius: 14, y: 7)
+    // Fila nav (logo PL en círculo de vidrio + fecha serif) y héroe editorial.
+    var homeHeader: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack {
+                Image("LogoPL")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 27, height: 25)
+                    .padding(10)
+                    .glassEffect(.regular, in: Circle())
+                Spacer()
+                Text(Date.now.formatted(
+                    .dateTime.weekday(.wide).day().month(.wide)
+                        .locale(Locale(identifier: "es_MX"))))
+                    .font(.serifItalic(14.5, .regular))
+                    .foregroundStyle(.textTertiary)
+            }
 
-            VStack(spacing: 7) {
-                // Tipografía dinámica: crece si el usuario sube el tamaño de texto en Ajustes.
-                Text("PrensaIA")
-                    .font(.system(.largeTitle, design: .serif, weight: .bold))
-                HStack(spacing: 10) {
-                    Rectangle().fill(.secondary.opacity(0.35)).frame(width: 26, height: 1)
-                    Text("TRANSCRIBE · ESCUCHA · ANALIZA")
-                        .font(.caption2.weight(.semibold))
-                        .tracking(2.2)
-                        .foregroundStyle(.secondary)
-                    Rectangle().fill(.secondary.opacity(0.35)).frame(width: 26, height: 1)
+            VStack(alignment: .leading, spacing: 7) {
+                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                    Text("PrensaIA")
+                        .font(.display(32, .black))
+                        .tracking(-0.6)
+                        .foregroundStyle(.textPrimary)
+                    PLCapsule(text: "IA LOCAL")
                 }
+                Text("Transcribe, escucha y analiza — sin internet.")
+                    .font(.display(14.5, .medium))
+                    .foregroundStyle(.textTertiary)
             }
         }
-        .frame(maxWidth: .infinity)
-        .padding(.top, 8)
+        .padding(.top, 6)
     }
 
     // MARK: Semáforo de estado del motor (discreto, en la pantalla principal)
@@ -57,22 +54,23 @@ extension ContentView {
     var engineStatusChip: some View {
         HStack(spacing: 8) {
             Image(systemName: engineStatus.icon)
-                .font(.caption)
+                .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(engineStatus.color)
                 .symbolEffect(.pulse, isActive: engineStatus.busy && !reduceMotion)
             Text(engineStatus.text)
-                .font(.caption.weight(.medium))
-                .foregroundStyle(.secondary)
+                .font(.display(12, .semibold))
+                .foregroundStyle(.textSecondary)
             if let pct = engineStatus.percent {
                 Text("\(pct)%")
-                    .font(.caption.monospacedDigit().weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .font(.display(12, .bold).monospacedDigit())
+                    .foregroundStyle(.textSecondary)
                     .contentTransition(.numericText())
             }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 8)
-        .glassEffect(.regular, in: Capsule())
+        .padding(.horizontal, 16)
+        .padding(.vertical, 9)
+        .glassEffect(.clear, in: Capsule())
+        .frame(maxWidth: .infinity)
         .animation(.smooth(duration: 0.3), value: engineStatus.text)
         .animation(.smooth(duration: 0.3), value: engineStatus.percent)
         .accessibilityElement(children: .combine)
@@ -85,143 +83,230 @@ extension ContentView {
             let fast = FastTranscriber.shared
             if fast.status == .loading {
                 let p = Int(fast.downloadProgress * 100)
-                return (.orange, "arrow.down.circle", "Descargando motor Rápido", true, p)
+                return (.goldText, "arrow.down.circle", "Descargando motor Rápido", true, p)
             }
             if fast.isReady || fast.isDownloaded {
-                return (.green, "checkmark.circle.fill", "Motor Rápido listo", false, nil)
+                return (.successGreen, "checkmark.circle.fill", "Motor Rápido listo", false, nil)
             }
-            return (.secondary, "arrow.down.circle", "Motor Rápido: sin descargar", false, nil)
+            return (.textTertiary, "arrow.down.circle", "Motor Rápido: sin descargar", false, nil)
         } else {
             if service.whisperReady {
-                return (.green, "checkmark.circle.fill", "Listo para transcribir", false, nil)
+                return (.successGreen, "checkmark.circle.fill", "Listo para transcribir", false, nil)
             }
             let dl = service.whisperDownloadProgress
             if dl > 0 && dl < 1 {
-                return (.orange, "arrow.down.circle", "Descargando motor (solo una vez)", true, Int(dl * 100))
+                return (.goldText, "arrow.down.circle", "Descargando motor (solo una vez)", true, Int(dl * 100))
             }
-            return (.orange, "circle.fill", "Preparando el motor…", true, nil)
+            return (.goldText, "circle.fill", "Preparando el motor…", true, nil)
         }
     }
 
-    // MARK: Acciones
+    // MARK: Acciones (Inicio)
 
-    var actionCard: some View {
-        VStack(spacing: 12) {
-            // Los botones de vidrio van agrupados en un GlassEffectContainer
-            // para que el sistema los fusione visualmente (Liquid Glass, iOS 26).
-            GlassEffectContainer(spacing: 12) {
-                VStack(spacing: 12) {
-                    Button {
-                        showImporter = true
-                    } label: {
-                        Label("Subir audio o video", systemImage: "square.and.arrow.up.fill")
-                            .mainButtonLabel()
-                    }
-                    .buttonStyle(.glassProminent)
-                    .tint(.brand)
+    var homeActions: some View {
+        VStack(spacing: 18) {
+            engineStatusChip
 
-                    Button {
-                        Task {
-                            let granted = await recorder.requestPermission()
-                            if granted {
-                                recorder.start()
-                                recordFailed = !recorder.isRecording
-                            } else { recordDenied = true }
-                        }
-                    } label: {
-                        Label("Grabar audio", systemImage: "mic.fill")
-                            .mainButtonLabel()
-                    }
-                    .buttonStyle(.glass)
-                    .tint(.brand)
+            // CTA principal: subir audio o video.
+            Button {
+                showImporter = true
+            } label: {
+                Label("Subir audio o video", systemImage: "square.and.arrow.up")
+                    .font(.display(15.5, .bold))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 17)
+            }
+            .buttonStyle(.glassProminent)
+            .buttonBorderShape(.roundedRectangle(radius: 18))
+            .tint(.brand)
 
-                    Button {
-                        Task {
-                            let granted = await recorder.requestPermission()
-                            if granted { await service.startLive() } else { recordDenied = true }
-                        }
-                    } label: {
-                        Label("Transcripción en vivo", systemImage: "waveform.badge.mic")
-                            .mainButtonLabel()
+            // Mosaico: Grabar · En vivo · Galería.
+            HStack(spacing: 12) {
+                Button {
+                    Task {
+                        let granted = await recorder.requestPermission()
+                        if granted {
+                            recorder.start()
+                            recordFailed = !recorder.isRecording
+                        } else { recordDenied = true }
                     }
-                    .buttonStyle(.glass)
-                    .tint(.brand)
-
-                    PhotosPicker(selection: $photoItem, matching: .videos) {
-                        Label("Elegir video de la galería", systemImage: "photo.on.rectangle.angled")
-                            .mainButtonLabel()
-                    }
-                    .buttonStyle(.glass)
-                    .tint(.brand)
-
-                    Button {
-                        liveCapture.refresh()
-                        showLiveCapture = true
-                    } label: {
-                        Label("Transcribir Facebook Live", systemImage: "dot.radiowaves.left.and.right")
-                            .mainButtonLabel()
-                    }
-                    .buttonStyle(.glass)
-                    .tint(.brand)
+                } label: {
+                    homeTile("Grabar", icon: "mic")
                 }
+                .buttonStyle(.plain)
+
+                Button {
+                    Task {
+                        let granted = await recorder.requestPermission()
+                        if granted { await service.startLive() } else { recordDenied = true }
+                    }
+                } label: {
+                    homeTile("En vivo", icon: "waveform.badge.mic")
+                }
+                .buttonStyle(.plain)
+
+                PhotosPicker(selection: $photoItem, matching: .videos) {
+                    homeTile("Galería", icon: "photo.on.rectangle")
+                }
+                .buttonStyle(.plain)
             }
 
             if recordDenied {
                 Text("Para grabar, activa el micrófono en Ajustes › PrensaIA.")
-                    .font(.footnote).foregroundStyle(.red)
-                    .multilineTextAlignment(.center).padding(.top, 2)
+                    .font(.display(12.5, .medium)).foregroundStyle(.liveRed)
+                    .multilineTextAlignment(.center)
             }
 
-            Toggle(isOn: Binding(
-                get: { service.diarizationEnabled },
-                set: { service.diarizationEnabled = $0 }
-            )) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Identificar oradores")
-                        .font(.subheadline.weight(.medium))
-                    Text("Detecta quién habla. La 1ª vez descarga un modelo.")
-                        .font(.caption).foregroundStyle(.secondary)
-                }
-            }
-            .tint(.brand)
-            .padding(.top, 4)
-
-            if service.diarizationEnabled {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Número de oradores")
-                            .font(.subheadline)
-                        Text("Indícalo si lo sabes: es más preciso.")
-                            .font(.caption).foregroundStyle(.secondary)
+            // Facebook Live.
+            Button {
+                liveCapture.refresh()
+                showLiveCapture = true
+            } label: {
+                HStack(spacing: 14) {
+                    Image(systemName: "dot.radiowaves.left.and.right")
+                        .font(.system(size: 21, weight: .semibold))
+                        .foregroundStyle(.brandText)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Transcribir Facebook Live")
+                            .font(.display(14.5, .bold))
+                            .foregroundStyle(.textPrimary)
+                        Text("Captura el audio de una transmisión y léelo casi en vivo.")
+                            .font(.display(12.5, .medium))
+                            .foregroundStyle(.textTertiary)
+                            .multilineTextAlignment(.leading)
                     }
                     Spacer()
-                    Menu {
-                        Button("Automático") { service.expectedSpeakers = 0 }
-                        ForEach(2...8, id: \.self) { n in
-                            Button("\(n)") { service.expectedSpeakers = n }
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(.textTertiary)
+                }
+            }
+            .buttonStyle(.plain)
+            .card(radius: 22, padding: 16)
+
+            // Oradores.
+            VStack(spacing: 0) {
+                PLSectionLabel("Oradores")
+                VStack(spacing: 14) {
+                    Toggle(isOn: Binding(
+                        get: { service.diarizationEnabled },
+                        set: { service.diarizationEnabled = $0 }
+                    )) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Identificar oradores")
+                                .font(.display(14.5, .bold))
+                                .foregroundStyle(.textPrimary)
+                            Text("Detecta quién habla. La 1ª vez descarga un modelo.")
+                                .font(.display(12.5, .medium))
+                                .foregroundStyle(.textTertiary)
                         }
-                    } label: {
-                        HStack(spacing: 4) {
-                            Text(service.expectedSpeakers == 0 ? "Automático" : "\(service.expectedSpeakers)")
-                                .font(.subheadline.weight(.semibold))
-                            Image(systemName: "chevron.up.chevron.down").font(.caption2)
-                        }
-                        .foregroundStyle(.brand)
                     }
+                    .tint(.brand)
+
+                    if service.diarizationEnabled {
+                        Rectangle().fill(.hairline).frame(height: 1)
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Número de oradores")
+                                    .font(.display(14.5, .medium))
+                                    .foregroundStyle(.textPrimary)
+                                Text("Indícalo si lo sabes: es más preciso.")
+                                    .font(.display(12.5, .medium))
+                                    .foregroundStyle(.textTertiary)
+                            }
+                            Spacer()
+                            Menu {
+                                Button("Automático") { service.expectedSpeakers = 0 }
+                                ForEach(2...8, id: \.self) { n in
+                                    Button("\(n)") { service.expectedSpeakers = n }
+                                }
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Text(service.expectedSpeakers == 0 ? "Automático" : "\(service.expectedSpeakers)")
+                                        .font(.display(14, .bold))
+                                    Image(systemName: "chevron.up.chevron.down")
+                                        .font(.system(size: 11, weight: .bold))
+                                }
+                                .foregroundStyle(.brandText)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 8)
+                                .glassEffect(.clear, in: Capsule())
+                            }
+                        }
+                    }
+                }
+                .card(radius: 22, padding: 16)
+            }
+
+            // Recientes (2 últimas transcripciones).
+            if !history.items.isEmpty {
+                VStack(spacing: 0) {
+                    PLSectionLabel("Recientes")
+                    VStack(spacing: 0) {
+                        ForEach(Array(history.items.prefix(2).enumerated()), id: \.element.id) { index, item in
+                            if index > 0 {
+                                Rectangle().fill(.hairline).frame(height: 1)
+                            }
+                            Button {
+                                loadItem(item)
+                            } label: {
+                                HStack(spacing: 12) {
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(item.title)
+                                            .font(.display(14, .bold))
+                                            .foregroundStyle(.textPrimary)
+                                            .lineLimit(1)
+                                        Text(item.date.formatted(date: .abbreviated, time: .shortened))
+                                            .font(.serifItalic(12, .regular))
+                                            .foregroundStyle(.textTertiary)
+                                    }
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 12, weight: .semibold))
+                                        .foregroundStyle(.textTertiary)
+                                }
+                                .padding(.vertical, 11)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .card(radius: 22, padding: 16)
                 }
             }
 
             if case .failed(let msg) = service.phase {
                 Text(msg)
-                    .font(.footnote).foregroundStyle(.red)
-                    .multilineTextAlignment(.center).padding(.top, 4)
+                    .font(.display(12.5, .medium)).foregroundStyle(.liveRed)
+                    .multilineTextAlignment(.center)
             } else if !service.showsResults {
-                Text("Se procesa en tu iPhone, en español y sin internet.")
-                    .font(.footnote).foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center).padding(.top, 4)
+                // Nota de privacidad — el sello de la casa.
+                HStack(spacing: 6) {
+                    Image(systemName: "checkmark.seal.fill")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.goldText)
+                    Text("Se procesa en tu iPhone, en español y sin internet.")
+                        .font(.display(12.5, .medium))
+                        .foregroundStyle(.textTertiary)
+                }
+                .frame(maxWidth: .infinity)
             }
         }
-        .card()
+    }
+
+    // Tile del mosaico: vidrio regular, ícono 24 + label 13.
+    func homeTile(_ title: String, icon: String) -> some View {
+        VStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.system(size: 23, weight: .medium))
+                .foregroundStyle(.brandText)
+            Text(title)
+                .font(.display(13, .bold))
+                .foregroundStyle(.textPrimary)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 84)
+        .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 
     var recordingCard: some View {
