@@ -310,19 +310,30 @@ extension ContentView {
     }
 
     var recordingCard: some View {
-        VStack(spacing: 16) {
-            HStack(spacing: 10) {
+        VStack(spacing: 18) {
+            HStack(spacing: 9) {
                 // Punto rojo que "late" mientras se graba.
                 Image(systemName: "circle.fill")
-                    .font(.system(size: 12))
-                    .foregroundStyle(.red)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.liveRed)
                     .symbolEffect(.pulse, isActive: !reduceMotion)
-                Text("Grabando…").font(.headline)
-                Spacer()
-                Text(timeLabel(recorder.elapsed))
-                    .font(.title3.monospacedDigit().weight(.semibold))
-                    .foregroundStyle(.brand)
+                Text("Grabando")
+                    .font(.display(16, .heavy))
+                    .foregroundStyle(.textPrimary)
             }
+            .frame(maxWidth: .infinity)
+
+            // Cronómetro grande: legible de un vistazo desde el escritorio.
+            Text(timeLabel(recorder.elapsed))
+                .font(.display(58, .bold).monospacedDigit())
+                .foregroundStyle(.textPrimary)
+                .contentTransition(.numericText())
+
+            RecordingWaveView()
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+
             Button {
                 if let url = recorder.stop() {
                     Task { await service.process(mediaURL: url) }
@@ -332,12 +343,15 @@ extension ContentView {
                     .mainButtonLabel()
             }
             .buttonStyle(.glassProminent)
+            .buttonBorderShape(.roundedRectangle(radius: 16))
             .tint(.brand)
-            Button(role: .destructive) {
+
+            Button {
                 recorder.cancel()
             } label: {
                 Text("Cancelar")
-                    .font(.subheadline.weight(.medium))
+                    .font(.display(15, .semibold))
+                    .foregroundStyle(.liveRed)
             }
         }
         .card()
@@ -348,28 +362,30 @@ extension ContentView {
             HStack(spacing: 10) {
                 if service.liveDone {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.title3).foregroundStyle(.green)
-                    Text("Transcripción lista").font(.headline)
+                        .font(.system(size: 19)).foregroundStyle(.successGreen)
+                    Text("Transcripción lista")
+                        .font(.display(17, .heavy))
+                        .foregroundStyle(.textPrimary)
+                    Spacer()
                 } else {
                     Image(systemName: "circle.fill")
-                        .font(.system(size: 12))
-                        .foregroundStyle(.red)
+                        .font(.system(size: 11))
+                        .foregroundStyle(.liveRed)
                         .symbolEffect(.pulse, isActive: !reduceMotion)
-                    Text(service.liveStarting ? "Preparando…" : "En vivo")
-                        .font(.headline)
+                    PLCapsule(text: service.liveStarting ? "PREPARANDO…" : "EN VIVO",
+                              variant: .wine)
                     Spacer()
                     Image(systemName: "waveform")
-                        .font(.title3).foregroundStyle(.brand)
-                        .symbolEffect(.variableColor.iterative, isActive: service.isLive)
+                        .font(.system(size: 19)).foregroundStyle(.brandText)
+                        .symbolEffect(.variableColor.iterative, isActive: service.isLive && !reduceMotion)
                 }
-                if service.liveDone { Spacer() }
             }
 
             ScrollViewReader { proxy in
                 ScrollView {
                     Text(liveAttributed)
-                        .font(.system(.body, design: .serif))
-                        .lineSpacing(5)
+                        .font(.serifItalic(18, .regular))
+                        .lineSpacing(11)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .textSelection(.enabled)
                         .padding(.vertical, 4)
@@ -391,10 +407,13 @@ extension ContentView {
 
             if service.liveStarting {
                 Text("Despertando el modelo… habla en un momento.")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.display(12, .medium)).foregroundStyle(.textTertiary)
             } else if !service.liveDone && service.liveFullText.isEmpty {
                 Text("Empieza a hablar… el texto aparecerá aquí.")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.display(12, .medium)).foregroundStyle(.textTertiary)
+            } else if !service.liveDone {
+                Text("El texto gris es provisional; se confirma al escuchar mejor.")
+                    .font(.display(12, .medium)).foregroundStyle(.textTertiary)
             }
 
             if service.liveDone {
@@ -407,12 +426,15 @@ extension ContentView {
                                 .mainButtonLabel()
                         }
                         .buttonStyle(.glassProminent)
+                        .buttonBorderShape(.roundedRectangle(radius: 16))
                         .tint(.brand)
 
-                        Button(role: .destructive) {
+                        Button {
                             service.clearLive()
                         } label: {
-                            Text("Listo").font(.subheadline.weight(.medium))
+                            Text("Listo")
+                                .font(.display(14, .semibold))
+                                .foregroundStyle(.textSecondary)
                         }
                     }
                 }
@@ -426,17 +448,19 @@ extension ContentView {
                                 .mainButtonLabel()
                         }
                         .buttonStyle(.glassProminent)
-                        .tint(.brand)
+                        .buttonBorderShape(.roundedRectangle(radius: 16))
+                        .tint(.liveRed)
 
                         Button {
                             UIPasteboard.general.string = service.liveFullText
                         } label: {
                             Image(systemName: "doc.on.doc")
-                                .font(.headline)
-                                .frame(width: 44, height: 44)
+                                .font(.system(size: 17, weight: .semibold))
+                                .frame(width: 54, height: 54)
                         }
                         .buttonStyle(.glass)
-                        .tint(.brand)
+                        .buttonBorderShape(.circle)
+                        .tint(.brandText)
                         .disabled(service.liveFullText.isEmpty)
                         .accessibilityLabel("Copiar el texto transcrito")
                     }
@@ -446,18 +470,23 @@ extension ContentView {
         .card()
     }
 
-    // Texto confirmado en negro + lo "en proceso" en gris.
+    // Texto confirmado (TextPrimary) + lo "en proceso" (TextTertiary) + caret.
     var liveAttributed: AttributedString {
         var result = AttributedString()
         if !service.liveConfirmed.isEmpty {
             var confirmed = AttributedString(service.liveConfirmed + " ")
-            confirmed.foregroundColor = .primary
+            confirmed.foregroundColor = UIColor(named: "TextPrimary") ?? .label
             result += confirmed
         }
         if !service.liveHypothesis.isEmpty {
             var pending = AttributedString(service.liveHypothesis)
-            pending.foregroundColor = .secondary
+            pending.foregroundColor = UIColor(named: "TextTertiary") ?? .tertiaryLabel
             result += pending
+        }
+        if service.isLive {
+            var caret = AttributedString("▍")
+            caret.foregroundColor = UIColor(named: "BrandText") ?? .label
+            result += caret
         }
         return result
     }
@@ -466,6 +495,14 @@ extension ContentView {
 
     var progressCard: some View {
         VStack(spacing: 20) {
+            // Anillo editorial: logo PL al centro (indeterminado) o % real.
+            ProgressRingView(progress: {
+                if case .transcribing(let frac) = service.phase, frac > 0 {
+                    return frac
+                }
+                return nil
+            }())
+
             HStack(alignment: .top, spacing: 8) {
                 stepItem("Preparar", index: 0)
                 stepItem("Transcribir", index: 1)
@@ -475,15 +512,16 @@ extension ContentView {
             VStack(spacing: 12) {
                 HStack(spacing: 10) {
                     if service.showStageSpinner {
-                        ProgressView().controlSize(.small)
+                        ProgressView().controlSize(.small).tint(.brandText)
                     }
                     Text(service.stageTitle)
-                        .font(.headline)
+                        .font(.display(16, .heavy))
+                        .foregroundStyle(.textPrimary)
                     Spacer()
                     if let pct = service.stagePercentText {
                         Text(pct)
-                            .font(.subheadline.monospacedDigit().weight(.bold))
-                            .foregroundStyle(.brand)
+                            .font(.display(14, .bold).monospacedDigit())
+                            .foregroundStyle(.brandText)
                             .contentTransition(.numericText())
                     }
                 }
@@ -502,13 +540,18 @@ extension ContentView {
                     ProgressView(value: FastTranscriber.shared.downloadProgress)
                         .tint(.brand)
                     Text("Descargando el motor Rápido (~600 MB, solo esta vez)… \(Int(FastTranscriber.shared.downloadProgress * 100))%")
-                        .font(.caption2).foregroundStyle(.secondary)
+                        .font(.display(11, .medium)).foregroundStyle(.textTertiary)
                 }
 
                 Text(service.stageSubtitle)
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.display(12.5, .medium)).foregroundStyle(.textTertiary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
+
+            Text("Puedes bloquear la pantalla; seguimos trabajando.")
+                .font(.display(11.5, .medium))
+                .foregroundStyle(.textTertiary)
+                .frame(maxWidth: .infinity)
         }
         .card()
     }
@@ -517,13 +560,85 @@ extension ContentView {
         VStack(spacing: 7) {
             Capsule()
                 .fill(index <= service.currentStep
-                      ? AnyShapeStyle(LinearGradient.brand)
-                      : AnyShapeStyle(Color(.systemGray5)))
+                      ? AnyShapeStyle(Color.brand)
+                      : AnyShapeStyle(Color.hairline))
                 .frame(height: 5)
             Text(label)
-                .font(.caption2.weight(index == service.currentStep ? .semibold : .regular))
-                .foregroundStyle(index <= service.currentStep ? Color.brand : .secondary)
+                .font(.display(11, index == service.currentStep ? .bold : .medium))
+                .foregroundStyle(index <= service.currentStep ? .brandText : .textTertiary)
         }
         .frame(maxWidth: .infinity)
+    }
+}
+
+// MARK: - Onda animada de grabación (26 barras, cada 5ª dorada)
+
+struct RecordingWaveView: View {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var animating = false
+    // Alturas aleatorias fijas por aparición (el movimiento lo da el scaleY).
+    private let heights: [CGFloat] = (0..<26).map { _ in CGFloat.random(in: 0.28...1.0) }
+
+    var body: some View {
+        HStack(spacing: 4.5) {
+            ForEach(0..<26, id: \.self) { i in
+                Capsule()
+                    .fill(i % 5 == 4 ? Color.goldFill : Color.brandText)
+                    .frame(width: 4.5, height: 46 * heights[i])
+                    .scaleEffect(y: (animating && !reduceMotion) ? 0.4 : 1, anchor: .center)
+                    .animation(reduceMotion ? nil
+                               : .easeInOut(duration: 1.05)
+                                   .repeatForever(autoreverses: true)
+                                   .delay(Double(i) * 0.055),
+                               value: animating)
+            }
+        }
+        .frame(height: 52)
+        .onAppear { animating = true }
+        .accessibilityHidden(true)
+    }
+}
+
+// MARK: - Anillo de progreso editorial (128 pt)
+
+struct ProgressRingView: View {
+    /// nil = indeterminado (arco girando con el logo PL al centro).
+    let progress: Double?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var spinning = false
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(Color.brandSoft, lineWidth: 9)
+            if let p = progress {
+                Circle()
+                    .trim(from: 0, to: max(0.02, p))
+                    .stroke(LinearGradient.brand,
+                            style: StrokeStyle(lineWidth: 9, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+                    .animation(.smooth(duration: 0.3), value: p)
+                Text("\(Int(p * 100))%")
+                    .font(.display(24, .bold).monospacedDigit())
+                    .foregroundStyle(.textPrimary)
+                    .contentTransition(.numericText())
+            } else {
+                Circle()
+                    .trim(from: 0, to: 0.25)
+                    .stroke(LinearGradient.brand,
+                            style: StrokeStyle(lineWidth: 9, lineCap: .round))
+                    .rotationEffect(.degrees(spinning ? 270 : -90))
+                    .animation(reduceMotion ? nil
+                               : .linear(duration: 1.1).repeatForever(autoreverses: false),
+                               value: spinning)
+                Image("LogoPL")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 46)
+            }
+        }
+        .frame(width: 128, height: 128)
+        .onAppear { spinning = true }
+        .accessibilityHidden(true)
     }
 }

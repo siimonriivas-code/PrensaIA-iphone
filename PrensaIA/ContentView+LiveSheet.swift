@@ -12,68 +12,65 @@ extension ContentView {
     // MARK: Facebook Live (captura de audio por pantalla)
 
     var liveCaptureSheet: some View {
-        NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
                     // Estado en vivo (se actualiza solo, sin botón "Actualizar").
                     HStack(spacing: 10) {
                         if liveCapture.isCapturing {
                             Image(systemName: "circle.fill")
-                                .font(.system(size: 12))
-                                .foregroundStyle(.red)
+                                .font(.system(size: 11))
+                                .foregroundStyle(.liveRed)
                                 .symbolEffect(.pulse, isActive: !reduceMotion)
-                            Text("Capturando…").font(.headline)
+                            Text("Capturando…")
+                                .font(.display(16, .heavy)).foregroundStyle(.textPrimary)
                             Spacer()
                             if let size = liveCapture.capturedSizeText() {
                                 Text(size)
-                                    .font(.subheadline.monospacedDigit().weight(.semibold))
-                                    .foregroundStyle(.brand)
+                                    .font(.display(14, .bold).monospacedDigit())
+                                    .foregroundStyle(.brandText)
                                     .contentTransition(.numericText())
                             }
                         } else if liveCapture.capturedSizeText() != nil {
                             Image(systemName: "checkmark.circle.fill")
-                                .font(.title3).foregroundStyle(.green)
-                            Text("Captura lista").font(.headline)
+                                .font(.system(size: 19)).foregroundStyle(.successGreen)
+                            Text("Captura lista")
+                                .font(.display(16, .heavy)).foregroundStyle(.textPrimary)
                             Spacer()
                             Text(liveCapture.capturedSizeText() ?? "")
-                                .font(.subheadline.monospacedDigit().weight(.semibold))
-                                .foregroundStyle(.brand)
+                                .font(.display(14, .bold).monospacedDigit())
+                                .foregroundStyle(.brandText)
                         } else {
                             Image(systemName: "waveform.slash")
-                                .font(.title3).foregroundStyle(.secondary)
-                            Text("Sin captura todavía").font(.headline)
-                                .foregroundStyle(.secondary)
+                                .font(.system(size: 19)).foregroundStyle(.textTertiary)
+                            Text("Sin captura todavía")
+                                .font(.display(16, .heavy))
+                                .foregroundStyle(.textTertiary)
                         }
                     }
-                    .padding(14)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(.thinMaterial,
-                                in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .card(radius: 22, padding: 16)
                     .accessibilityElement(children: .combine)
 
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Cómo funciona")
-                            .font(.headline)
+                            .font(.display(15.5, .heavy)).foregroundStyle(.textPrimary)
                         liveStep("1.", "Conecta tus AirPods/audífonos (o baja el volumen). Así nadie en tu oficina escucha.")
                         liveStep("2.", "Toca el botón de captura de abajo y elige “PrensaLiveCapture” → Iniciar transmisión.")
                         liveStep("3.", "Abre Facebook y reproduce el live. La app va guardando el audio en segundo plano.")
                         liveStep("4.", "Cuando quieras (a media transmisión o al final), vuelve aquí y toca “Transcribir lo capturado”.")
                     }
-                    .padding(16)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(.thinMaterial,
-                                in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .card(radius: 22, padding: 16)
 
                     HStack(spacing: 14) {
                         BroadcastPickerView(extensionID: liveCapture.broadcastExtensionID)
                             .frame(width: 56, height: 56)
-                            .background(Color.brand.opacity(0.12), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                            .background(liveCapture.isCapturing ? Color.liveRed : Color.brand,
+                                        in: RoundedRectangle(cornerRadius: 18, style: .continuous))
                             .accessibilityLabel("Iniciar o detener la captura de audio")
                         VStack(alignment: .leading, spacing: 3) {
                             Text("Iniciar / detener captura")
-                                .font(.subheadline.weight(.semibold))
+                                .font(.display(14.5, .bold)).foregroundStyle(.textPrimary)
                             Text("Toca el ícono. La barra roja de arriba indica que está capturando.")
-                                .font(.caption).foregroundStyle(.secondary)
+                                .font(.display(12.5, .medium)).foregroundStyle(.textTertiary)
                         }
                     }
 
@@ -82,12 +79,12 @@ extension ContentView {
                         VStack(alignment: .leading, spacing: 10) {
                             HStack {
                                 Label("Leer casi en vivo", systemImage: "text.viewfinder")
-                                    .font(.subheadline.weight(.bold))
-                                    .foregroundStyle(.brand)
+                                    .font(.display(14, .heavy))
+                                    .foregroundStyle(.brandText)
                                 Spacer()
                                 if service.followActive {
                                     Button("Pausar") { service.stopFollowing() }
-                                        .font(.caption.weight(.bold)).foregroundStyle(.secondary)
+                                        .font(.display(12.5, .bold)).foregroundStyle(.textTertiary)
                                 } else if liveCapture.isCapturing {
                                     Button {
                                         if let url = liveCapture.capturedAudioURL() {
@@ -95,9 +92,9 @@ extension ContentView {
                                         }
                                     } label: {
                                         Label("Activar", systemImage: "play.fill")
-                                            .font(.caption.weight(.bold))
+                                            .font(.display(12.5, .heavy))
                                     }
-                                    .foregroundStyle(.brand)
+                                    .foregroundStyle(.brandText)
                                     .disabled(liveCapture.capturedAudioURL() == nil)
                                 }
                             }
@@ -106,13 +103,14 @@ extension ContentView {
                                 ScrollViewReader { proxy in
                                     ScrollView {
                                         Text(service.followText)
-                                            .font(.system(.body, design: .serif))
-                                            .lineSpacing(5)
+                                            .font(.serifItalic(16.5, .regular))
+                                            .lineSpacing(9)
+                                            .foregroundStyle(.textPrimary)
                                             .frame(maxWidth: .infinity, alignment: .leading)
                                             .textSelection(.enabled)
                                         Color.clear.frame(height: 1).id("finDelTexto")
                                     }
-                                    .frame(minHeight: 120, maxHeight: 280)
+                                    .frame(minHeight: 120, maxHeight: 210)
                                     .onChange(of: service.followText) { _, _ in
                                         withAnimation { proxy.scrollTo("finDelTexto", anchor: .bottom) }
                                     }
@@ -121,15 +119,12 @@ extension ContentView {
 
                             if !service.followHint.isEmpty && service.followActive {
                                 Text(service.followHint)
-                                    .font(.caption2).foregroundStyle(.secondary)
+                                    .font(.display(11, .medium)).foregroundStyle(.textTertiary)
                             }
                             Text("Es una lectura rápida por tramos. Al final, “Transcribir lo capturado” te da la versión completa y precisa.")
-                                .font(.caption2).foregroundStyle(.tertiary)
+                                .font(.display(11.5, .medium)).foregroundStyle(.textTertiary)
                         }
-                        .padding(16)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(.thinMaterial,
-                                    in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .card(radius: 22, padding: 16)
                     }
 
                     Button {
@@ -150,28 +145,32 @@ extension ContentView {
                             .mainButtonLabel()
                     }
                     .buttonStyle(.glassProminent)
+                    .buttonBorderShape(.roundedRectangle(radius: 16))
                     .tint(.brand)
                     .disabled(liveCapture.capturedAudioURL() == nil)
+                    .opacity(liveCapture.capturedAudioURL() == nil ? 0.5 : 1)
 
                     if liveCapture.capturedSizeText() != nil && !liveCapture.isCapturing {
-                        Button(role: .destructive) {
+                        Button {
                             service.clearFollow()
                             liveCapture.clearCapture()
                         } label: {
                             Label("Borrar captura y empezar de cero", systemImage: "trash")
-                                .font(.subheadline.weight(.medium))
+                                .font(.display(13.5, .semibold))
+                                .foregroundStyle(.liveRed)
                         }
                         .frame(maxWidth: .infinity)
                     }
 
                     Text("Nota: algunos videos protegidos (con copia bloqueada) no se pueden capturar. Si la transcripción sale en silencio, prueba reproducir el live desde Safari (facebook.com) en vez de la app de Facebook.")
-                        .font(.caption2).foregroundStyle(.secondary)
+                        .font(.display(11, .medium)).foregroundStyle(.textTertiary)
                 }
                 .padding(18)
             }
             .background { AppBackdrop() }
             .navigationTitle("Facebook Live")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarVisibility(.hidden, for: .tabBar)
             .task {
                 // Refresco automático mientras la pantalla está abierta.
                 while !Task.isCancelled {
@@ -179,18 +178,13 @@ extension ContentView {
                     try? await Task.sleep(nanoseconds: 2_000_000_000)
                 }
             }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Cerrar") { showLiveCapture = false }
-                }
-            }
-        }
     }
 
     func liveStep(_ num: String, _ text: String) -> some View {
         HStack(alignment: .top, spacing: 8) {
-            Text(num).font(.subheadline.weight(.bold)).foregroundStyle(.brand)
-            Text(text).font(.callout).foregroundStyle(.secondary)
+            Text(num).font(.display(13, .heavy)).foregroundStyle(.brandText)
+            Text(text).font(.display(13, .medium)).lineSpacing(3)
+                .foregroundStyle(.textTertiary)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
     }

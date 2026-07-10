@@ -232,7 +232,7 @@ struct ContentView: View {
             .navigationDestination(isPresented: $showResults) {
                 resultsScreen
             }
-            .sheet(isPresented: $showLiveCapture) {
+            .navigationDestination(isPresented: $showLiveCapture) {
                 liveCaptureSheet
             }
             .onAppear {
