@@ -16,7 +16,9 @@ extension ContentView {
     var transcriptView: some View {
         if service.segments.isEmpty {
             Text(service.transcript)
-                .font(.callout).textSelection(.enabled)
+                .font(.display(14.5, .medium))
+                .foregroundStyle(.textSecondary)
+                .textSelection(.enabled)
                 .frame(maxWidth: .infinity, alignment: .leading)
         } else {
             VStack(alignment: .leading, spacing: 12) {
@@ -25,6 +27,7 @@ extension ContentView {
                 if manualMode, let (s, e) = manualRange {
                     manualNamingPanel(s, e)
                 }
+                // Todas las frases viven en UNA tarjeta de vidrio.
                 LazyVStack(alignment: .leading, spacing: 2) {
                     ForEach(Array(service.segments.enumerated()), id: \.element.id) { i, seg in
                         if let sid = seg.speakerId, i == 0 || service.segments[i - 1].speakerId != sid {
@@ -33,6 +36,7 @@ extension ContentView {
                         segmentRow(seg)
                     }
                 }
+                .card(radius: 26, padding: 10)
             }
         }
     }
@@ -44,11 +48,11 @@ extension ContentView {
             HStack(spacing: 6) {
                 Circle().fill(speakerColor(id)).frame(width: 9, height: 9)
                 Text(speakerName(id))
-                    .font(.caption.weight(.bold))
+                    .font(.display(12.5, .heavy))
                     .foregroundStyle(speakerColor(id))
                 Image(systemName: "pencil")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.textTertiary)
             }
         }
         .buttonStyle(.plain)
@@ -66,10 +70,10 @@ extension ContentView {
     var playerArea: some View {
         if service.isVideo, service.playbackURL != nil {
             VideoPlayer(player: player.avPlayer)
-                .frame(height: 220)
+                .frame(height: 212)
                 .frame(maxWidth: .infinity)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .background(Color.black, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .background(Color.black, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
         } else {
             playerBar
         }
@@ -112,18 +116,18 @@ extension ContentView {
                 }
 
                 Text("\(timeLabel(player.currentTime)) / \(timeLabel(player.duration))")
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(.secondary)
+                    .font(.display(11.5, .semibold).monospacedDigit())
+                    .foregroundStyle(.textTertiary)
             }
 
             Button {
                 player.cycleRate()
             } label: {
                 Text(player.rate == 1.0 ? "1x" : (player.rate == 1.5 ? "1.5x" : "2x"))
-                    .font(.caption.weight(.bold).monospacedDigit())
-                    .foregroundStyle(.brand)
+                    .font(.display(12.5, .bold).monospacedDigit())
+                    .foregroundStyle(.brandText)
                     .frame(width: 38, height: 28)
-                    .background(Color.brand.opacity(0.12), in: Capsule())
+                    .background(Color.brandSoft, in: Capsule())
             }
             .buttonStyle(.plain)
             .disabled(!player.isLoaded)
@@ -140,13 +144,13 @@ extension ContentView {
                 Label(manualStart == nil ? "Toca el inicio del tema"
                       : (manualEnd == nil ? "Ahora toca el final" : "Ponle nombre y guarda"),
                       systemImage: "hand.tap")
-                    .font(.caption.weight(.medium)).foregroundStyle(.brand)
+                    .font(.display(12.5, .semibold)).foregroundStyle(.brandText)
                 Spacer()
                 Button("Listo") { cancelManual() }
-                    .font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                    .font(.display(12.5, .bold)).foregroundStyle(.textTertiary)
             } else {
                 Text("Toca una frase para escucharla desde ese minuto")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.display(12.5, .medium)).foregroundStyle(.textTertiary)
                 Spacer()
                 Button {
                     manualMode = true
@@ -154,9 +158,9 @@ extension ContentView {
                     manualEnd = nil
                 } label: {
                     Label("Marcar tema", systemImage: "scissors")
-                        .font(.caption.weight(.bold))
+                        .font(.display(12.5, .heavy))
                 }
-                .foregroundStyle(.brand)
+                .foregroundStyle(.brandText)
             }
         }
     }
@@ -164,26 +168,27 @@ extension ContentView {
     func manualNamingPanel(_ s: Double, _ e: Double) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Tema de \(timeLabel(s)) a \(timeLabel(e))")
-                .font(.subheadline.weight(.bold)).foregroundStyle(.brand)
+                .font(.display(13.5, .heavy)).foregroundStyle(.brandText)
             TextField("Nombre del tema (ej. Seguridad)", text: $manualName)
-                .textFieldStyle(.roundedBorder)
+                .font(.display(14, .medium))
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             Button {
                 saveManualTopic()
             } label: {
                 Label("Guardar tema", systemImage: "checkmark.circle.fill")
-                    .font(.subheadline.weight(.semibold))
+                    .font(.display(14.5, .bold))
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .glassEffect(.regular.tint(.brand).interactive(),
-                                 in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-                    .foregroundStyle(.white)
+                    .padding(.vertical, 13)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.glassProminent)
+            .buttonBorderShape(.roundedRectangle(radius: 14))
+            .tint(.brand)
             Text("Aparecerá en “Cortes”, en tu sección. Puedes marcar varios seguidos.")
-                .font(.caption2).foregroundStyle(.secondary)
+                .font(.display(11, .medium)).foregroundStyle(.textTertiary)
         }
-        .padding(12)
-        .background(Color.brand.opacity(0.08), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .card(radius: 20, padding: 14)
     }
 
     func segmentRow(_ seg: TimedSegment) -> some View {
@@ -199,21 +204,21 @@ extension ContentView {
         } label: {
             HStack(alignment: .top, spacing: 12) {
                 Text(timeLabel(seg.start))
-                    .font(.caption.monospacedDigit().weight(.medium))
-                    .foregroundStyle(highlighted ? Color.brand : .secondary)
-                    .frame(width: 48, alignment: .leading)
+                    .font(.display(12, .semibold).monospacedDigit())
+                    .foregroundStyle(highlighted ? .brandText : .textTertiary)
+                    .frame(width: 44, alignment: .leading)
                     .padding(.top, 3)
                 Text(seg.text)
-                    .font(.callout)
-                    .fontWeight(highlighted ? .medium : .regular)
-                    .foregroundStyle(highlighted ? Color.brand : .primary)
+                    .font(.display(14.5, highlighted ? .semibold : .medium))
+                    .lineSpacing(4)
+                    .foregroundStyle(highlighted ? .brandText : .textSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.vertical, 8)
             .padding(.horizontal, 10)
-            .background(selected ? Color.brand.opacity(0.18)
-                        : (active ? Color.brand.opacity(0.10) : Color.clear),
-                        in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .background(selected ? AnyShapeStyle(Color.brand.opacity(0.16))
+                        : (active ? AnyShapeStyle(Color.brandSoft) : AnyShapeStyle(Color.clear)),
+                        in: RoundedRectangle(cornerRadius: 14, style: .continuous))
             .overlay(alignment: .leading) {
                 if let sid = seg.speakerId {
                     RoundedRectangle(cornerRadius: 1.5)

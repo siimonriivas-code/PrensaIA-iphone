@@ -30,9 +30,9 @@ extension ContentView {
                     aiDownloadRow
                 } else {
                     HStack(spacing: 10) {
-                        ProgressView()
+                        ProgressView().tint(.brandText)
                         Text("Limpiando con IA… \(Int(service.cleanProgress * 100))%")
-                            .font(.caption).foregroundStyle(.secondary)
+                            .font(.display(12.5, .medium)).foregroundStyle(.textTertiary)
                     }
                 }
             } else if service.cleanedTurns != nil {
@@ -42,12 +42,23 @@ extension ContentView {
                         Text("Original").tag(false)
                     }
                     .pickerStyle(.segmented)
-                    .fixedSize()
+                    .frame(width: 190)
                     Spacer()
                     if showCleaned {
                         Label("Revisa antes de publicar", systemImage: "exclamationmark.triangle")
-                            .font(.caption2).foregroundStyle(.secondary)
+                            .font(.display(11, .medium)).foregroundStyle(.textTertiary)
                     }
+                    Button {
+                        UIPasteboard.general.string = exportForCurrentTab()
+                    } label: {
+                        Image(systemName: "doc.on.doc")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(.brandText)
+                            .frame(width: 40, height: 40)
+                    }
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.circle)
+                    .accessibilityLabel("Copiar la estenográfica")
                 }
             } else {
                 Button {
@@ -55,12 +66,12 @@ extension ContentView {
                     Task { await service.cleanTranscript() }
                 } label: {
                     Label("Limpiar con IA", systemImage: "sparkles")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.brand)
+                        .font(.display(14, .heavy))
+                        .foregroundStyle(.brandText)
                 }
                 .buttonStyle(.borderless)
                 if case .failed(let msg) = service.cleanState {
-                    Text(msg).font(.caption).foregroundStyle(.red)
+                    Text(msg).font(.display(12, .medium)).foregroundStyle(.liveRed)
                 }
             }
         }
@@ -74,18 +85,20 @@ extension ContentView {
                         HStack(spacing: 6) {
                             Circle().fill(speakerColor(sid)).frame(width: 9, height: 9)
                             Text(speakerName(sid).uppercased())
-                                .font(.caption.weight(.bold)).tracking(0.6)
+                                .font(.display(11.5, .heavy)).tracking(0.8)
                                 .foregroundStyle(speakerColor(sid))
                         }
                     }
                     Text(turn.text)
-                        .font(.system(.callout, design: .serif))
-                        .lineSpacing(5)
+                        .font(.serifItalic(16.5, .regular))
+                        .lineSpacing(9)
+                        .foregroundStyle(.textPrimary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
         }
         .textSelection(.enabled)
+        .card()
     }
 
     @ViewBuilder
@@ -93,10 +106,12 @@ extension ContentView {
         let turns = speakerTurns()
         if turns.isEmpty {
             Text(service.transcript)
-                .font(.system(.callout, design: .serif))
-                .lineSpacing(5)
+                .font(.serifItalic(16.5, .regular))
+                .lineSpacing(9)
+                .foregroundStyle(.textPrimary)
                 .textSelection(.enabled)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .card()
         } else {
             VStack(alignment: .leading, spacing: 22) {
                 ForEach(Array(turns.enumerated()), id: \.offset) { _, turn in
@@ -108,24 +123,26 @@ extension ContentView {
                                 HStack(spacing: 6) {
                                     Circle().fill(speakerColor(sid)).frame(width: 9, height: 9)
                                     Text(speakerName(sid).uppercased())
-                                        .font(.caption.weight(.bold)).tracking(0.6)
+                                        .font(.display(11.5, .heavy)).tracking(0.8)
                                         .foregroundStyle(speakerColor(sid))
                                     Image(systemName: "pencil")
-                                        .font(.caption2).foregroundStyle(.secondary)
+                                        .font(.system(size: 11)).foregroundStyle(.textTertiary)
                                 }
                             }
                             .buttonStyle(.plain)
                         }
                         ForEach(Array(turn.paragraphs.enumerated()), id: \.offset) { _, para in
                             Text(para)
-                                .font(.system(.callout, design: .serif))
-                                .lineSpacing(5)
+                                .font(.serifItalic(16.5, .regular))
+                                .lineSpacing(9)
+                                .foregroundStyle(.textPrimary)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
                 }
             }
             .textSelection(.enabled)
+            .card()
         }
     }
 

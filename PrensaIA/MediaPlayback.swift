@@ -171,8 +171,8 @@ struct WaveformView: View {
                 let spacing: CGFloat = 1
                 let barW = max(1, size.width / CGFloat(count) - spacing)
                 let mid = size.height / 2
-                let playedColor = Color.brand
-                let restColor = Color(.systemGray4)
+                let playedColor = Color("BrandText")
+                let restColor = Color("HairlineDivider")
                 for (i, s) in samples.enumerated() {
                     let h = max(2, CGFloat(s) * size.height)
                     let x = CGFloat(i) * (size.width / CGFloat(count))

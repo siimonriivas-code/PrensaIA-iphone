@@ -14,9 +14,8 @@ extension ContentView {
 
     @ViewBuilder
     var analysisView: some View {
-        VStack(alignment: .leading, spacing: 22) {
+        VStack(alignment: .leading, spacing: 16) {
             analysisContent
-            Divider()
             qaSection
         }
     }
@@ -52,21 +51,21 @@ extension ContentView {
             VStack(alignment: .leading, spacing: 12) {
                 sectionHeader("Sugeridos por la IA", icon: "sparkles")
                 Text("La IA divide la entrevista en bloques por tema, con el minuto donde empieza y termina cada uno. Útil para encontrar tus cortes de video.")
-                    .font(.callout).foregroundStyle(.secondary)
+                    .font(.display(13.5, .medium)).lineSpacing(3)
+                    .foregroundStyle(.textSecondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Button {
                     selectedBlockIDs = []
                     Task { await service.suggestBlocks() }
                 } label: {
                     Label("Sugerir cortes por tema", systemImage: "scissors")
-                        .font(.subheadline.weight(.semibold))
+                        .font(.display(14.5, .bold))
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .glassEffect(.regular.tint(.brand).interactive(),
-                                     in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                        .foregroundStyle(.white)
+                        .padding(.vertical, 13)
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.glassProminent)
+                .buttonBorderShape(.roundedRectangle(radius: 14))
+                .tint(.brand)
             }
         case .running:
             VStack(alignment: .leading, spacing: 12) {
@@ -108,10 +107,7 @@ extension ContentView {
 
     func sectionHeader(_ title: String, icon: String, count: Int? = nil) -> some View {
         HStack(spacing: 7) {
-            Image(systemName: icon).font(.caption2).foregroundStyle(.brand)
-            Text(title.uppercased())
-                .font(.caption.weight(.bold)).tracking(0.8).foregroundStyle(.brand)
-            if let count { Text("(\(count))").font(.caption2.weight(.bold)).foregroundStyle(.secondary) }
+            PLEyebrow(count != nil ? "\(title) (\(count!))" : title, icon: icon)
             Spacer()
         }
     }
@@ -198,32 +194,37 @@ extension ContentView {
         let card = Button {
             player.playRange(b.inicio, b.fin)
         } label: {
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text(b.tema).font(.subheadline.weight(.bold)).foregroundStyle(.primary)
+            VStack(alignment: .leading, spacing: 7) {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text(b.tema)
+                        .font(.display(14.5, .heavy))
+                        .foregroundStyle(.textPrimary)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    Text(manual ? "MÍO" : "IA")
-                        .font(.caption2.weight(.bold))
-                        .padding(.horizontal, 6).padding(.vertical, 2)
-                        .background(manual ? Color.brand.opacity(0.15) : Color.orange.opacity(0.18), in: Capsule())
-                        .foregroundStyle(manual ? Color.brand : Color.orange)
-                    Image(systemName: "play.circle.fill").font(.title3).foregroundStyle(.brand)
+                    PLCapsule(text: manual ? "MÍO" : "IA",
+                              variant: manual ? .wine : .gold, size: 9.5)
+                    Image(systemName: "play.circle.fill")
+                        .font(.system(size: 20)).foregroundStyle(.brandText)
                 }
                 Text("\(timeLabel(b.inicio)) – \(timeLabel(b.fin))")
-                    .font(.caption.weight(.semibold)).foregroundStyle(.brand)
+                    .font(.display(11.5, .bold).monospacedDigit())
+                    .foregroundStyle(.goldText)
                 if !b.resumen.isEmpty {
-                    Text(b.resumen).font(.callout).foregroundStyle(.secondary)
+                    Text(b.resumen)
+                        .font(.display(13, .medium))
+                        .lineSpacing(3)
+                        .foregroundStyle(.textTertiary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
-            .padding(12)
+            .padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(selected ? AnyShapeStyle(Color.brand.opacity(0.14))
+            .background(selected ? AnyShapeStyle(Color.brandSoft)
                                  : AnyShapeStyle(.thinMaterial),
-                        in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .strokeBorder(selected ? Color.brand.opacity(0.5) : Color.clear, lineWidth: 1.5)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .strokeBorder(selected ? Color.brand : Color.primary.opacity(0.06),
+                                  lineWidth: selected ? 1.5 : 1)
             }
         }
         .buttonStyle(.plain)
@@ -233,8 +234,8 @@ extension ContentView {
                 toggleBlockSelection(b.id)
             } label: {
                 Image(systemName: selected ? "checkmark.circle.fill" : "circle")
-                    .font(.title3)
-                    .foregroundStyle(selected ? Color.brand : Color.secondary)
+                    .font(.system(size: 22))
+                    .foregroundStyle(selected ? .brand : .textTertiary)
                     .padding(.top, 12)
             }
             .buttonStyle(.plain)
@@ -275,12 +276,12 @@ extension ContentView {
                         }
                     } label: {
                         Text(selectedCount == bloques.count ? "Quitar todo" : "Seleccionar todo")
-                            .font(.caption.weight(.semibold)).foregroundStyle(.brand)
+                            .font(.display(12.5, .bold)).foregroundStyle(.brandText)
                     }
                     Spacer()
                     if selectedCount > 0 {
                         Text("\(selectedCount) seleccionado\(selectedCount == 1 ? "" : "s")")
-                            .font(.caption).foregroundStyle(.secondary)
+                            .font(.display(12, .medium)).foregroundStyle(.textTertiary)
                     }
                 }
                 Menu {
@@ -299,14 +300,15 @@ extension ContentView {
                 } label: {
                     Label(selectedCount == 0 ? "Exporta los cortes seleccionados" : "Exportar \(selectedCount) corte\(selectedCount == 1 ? "" : "s")",
                           systemImage: "scissors")
-                        .font(.subheadline.weight(.semibold))
+                        .font(.display(14.5, .bold))
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .glassEffect(.regular.tint(selectedCount == 0 ? Color.brand.opacity(0.35) : Color.brand).interactive(),
-                                     in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                        .foregroundStyle(.white)
+                        .padding(.vertical, 13)
                 }
+                .buttonStyle(.glassProminent)
+                .buttonBorderShape(.roundedRectangle(radius: 14))
+                .tint(.brand)
                 .disabled(selectedCount == 0)
+                .opacity(selectedCount == 0 ? 0.5 : 1)
             }
             .padding(.top, 6)
         }
@@ -344,24 +346,25 @@ extension ContentView {
 
     var qaSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 7) {
-                Image(systemName: "questionmark.bubble").font(.caption2).foregroundStyle(.brand)
-                Text("PREGÚNTALE A ESTA ENTREVISTA")
-                    .font(.caption.weight(.bold)).tracking(0.8).foregroundStyle(.brand)
-            }
-            HStack(alignment: .bottom, spacing: 8) {
+            PLEyebrow("Pregúntale a esta entrevista", icon: "questionmark.bubble")
+            HStack(alignment: .center, spacing: 10) {
                 TextField("Ej. ¿Qué dijo sobre el presupuesto?", text: $qaQuestion, axis: .vertical)
-                    .font(.callout)
-                    .padding(10)
-                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                    .font(.display(14, .medium))
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 11)
+                    .glassEffect(.clear, in: Capsule())
                     .lineLimit(1...4)
                 Button {
                     askQuestion()
                 } label: {
-                    Image(systemName: "arrow.up.circle.fill")
-                        .font(.title2)
-                        .foregroundStyle(qaTrimmedEmpty ? Color.secondary : Color.brand)
+                    Image(systemName: "arrow.up")
+                        .font(.system(size: 16, weight: .bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 42, height: 42)
+                        .background(Color.brand, in: Circle())
+                        .opacity(qaTrimmedEmpty ? 0.55 : 1)
                 }
+                .buttonStyle(.plain)
                 .disabled(qaTrimmedEmpty || service.qaState == .running)
                 .accessibilityLabel("Enviar pregunta")
             }
@@ -369,21 +372,24 @@ extension ContentView {
             case .running:
                 if isAIDownloading { aiDownloadRow } else { loadingRow("Pensando…") }
             case .failed(let msg):
-                Text(msg).font(.callout).foregroundStyle(.secondary)
+                Text(msg).font(.display(13.5, .medium)).foregroundStyle(.textSecondary)
             case .done:
                 if let ans = service.qaAnswer {
                     Text(ans)
-                        .font(.callout)
+                        .font(.display(14, .medium))
+                        .lineSpacing(5)
+                        .foregroundStyle(.textPrimary)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(12)
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                        .padding(14)
+                        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                         .textSelection(.enabled)
                 }
             case .idle:
                 Text("La IA responde solo con lo que se dijo en el audio.")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(.display(12, .medium)).foregroundStyle(.textTertiary)
             }
         }
+        .card(radius: 24, padding: 18)
     }
 
     var qaTrimmedEmpty: Bool {
@@ -421,7 +427,7 @@ extension ContentView {
                         analysisBlock("Titulares sugeridos", icon: "newspaper") { headlineList(a.titulares) }
                     }
                     Text("Verifica las citas con la grabación antes de publicar.")
-                        .font(.caption).foregroundStyle(.secondary).padding(.top, 2)
+                        .font(.display(11.5, .medium)).foregroundStyle(.textTertiary).padding(.top, 2)
                 }
             } else {
                 Text("El análisis aparecerá aquí.").font(.callout).foregroundStyle(.secondary)
@@ -429,36 +435,39 @@ extension ContentView {
         }
     }
 
+    // Tarjeta de vidrio con eyebrow dorado — bloque editorial del análisis.
     func analysisBlock<C: View>(_ title: String, icon: String, @ViewBuilder content: () -> C) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 7) {
-                Image(systemName: icon).font(.caption2).foregroundStyle(.brand)
-                Text(title.uppercased())
-                    .font(.caption.weight(.bold))
-                    .tracking(0.8)
-                    .foregroundStyle(.brand)
-            }
+        VStack(alignment: .leading, spacing: 12) {
+            PLEyebrow(title, icon: icon)
             content()
         }
+        .card(radius: 24, padding: 18)
     }
 
     func bullets(_ items: [String]) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 9) {
             ForEach(items, id: \.self) { item in
                 HStack(alignment: .top, spacing: 10) {
-                    Circle().fill(Color.brand).frame(width: 5, height: 5).padding(.top, 7)
-                    Text(item).font(.callout).frame(maxWidth: .infinity, alignment: .leading)
+                    Circle().fill(Color.goldFill).frame(width: 5, height: 5).padding(.top, 7)
+                    Text(item)
+                        .font(.display(14.5, .medium))
+                        .lineSpacing(4)
+                        .foregroundStyle(.textSecondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
         }
     }
 
     func quoteList(_ items: [String]) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 14) {
             ForEach(items, id: \.self) { item in
-                HStack(spacing: 10) {
-                    RoundedRectangle(cornerRadius: 2).fill(Color.brand.opacity(0.45)).frame(width: 3)
-                    Text(item).font(.callout).italic()
+                HStack(spacing: 12) {
+                    RoundedRectangle(cornerRadius: 2).fill(Color.goldFill).frame(width: 3)
+                    Text("“\(item)”")
+                        .font(.serifItalic(15.5, .regular))
+                        .lineSpacing(6)
+                        .foregroundStyle(.textPrimary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
@@ -466,11 +475,28 @@ extension ContentView {
     }
 
     func headlineList(_ items: [String]) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            ForEach(items, id: \.self) { item in
-                Text(item)
-                    .font(.system(.callout, design: .serif).weight(.semibold))
-                    .frame(maxWidth: .infinity, alignment: .leading)
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(items.enumerated()), id: \.offset) { index, item in
+                if index > 0 {
+                    Rectangle().fill(.hairline).frame(height: 1)
+                }
+                HStack(alignment: .top, spacing: 10) {
+                    Text(item)
+                        .font(.display(14.5, .bold))
+                        .lineSpacing(3)
+                        .foregroundStyle(.textPrimary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Button {
+                        UIPasteboard.general.string = item
+                    } label: {
+                        Image(systemName: "doc.on.doc")
+                            .font(.system(size: 13))
+                            .foregroundStyle(.textTertiary)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Copiar titular")
+                }
+                .padding(.vertical, 10)
             }
         }
     }
