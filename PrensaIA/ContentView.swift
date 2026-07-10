@@ -110,6 +110,12 @@ struct ContentView: View {
         }
         .tabBarMinimizeBehavior(.onScrollDown)
         .tint(.brand)
+        .onAppear {
+            if !hasOnboarded { showOnboarding = true }
+        }
+        .fullScreenCover(isPresented: $showOnboarding, onDismiss: { hasOnboarded = true }) {
+            OnboardingView(isPresented: $showOnboarding)
+        }
     }
 
     var homeTab: some View {
@@ -234,12 +240,6 @@ struct ContentView: View {
             }
             .navigationDestination(isPresented: $showLiveCapture) {
                 liveCaptureSheet
-            }
-            .onAppear {
-                if !hasOnboarded { showOnboarding = true }
-            }
-            .sheet(isPresented: $showOnboarding, onDismiss: { hasOnboarded = true }) {
-                OnboardingView(isPresented: $showOnboarding)
             }
             .alert("No se pudo crear el PDF", isPresented: $pdfExportFailed) {
                 Button("Entendido", role: .cancel) {}

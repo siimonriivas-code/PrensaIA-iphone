@@ -39,43 +39,54 @@ struct OnboardingView: View {
             HStack {
                 Spacer()
                 Button("Saltar") { isPresented = false }
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(.secondary)
+                    .font(.display(14, .semibold))
+                    .foregroundStyle(.textTertiary)
                     .padding(.trailing, 20)
                     .padding(.top, 18)
             }
 
             TabView(selection: $page) {
                 ForEach(Array(features.enumerated()), id: \.offset) { i, f in
-                    VStack(spacing: 26) {
+                    VStack(spacing: 28) {
                         Circle()
                             .fill(LinearGradient.brand)
-                            .frame(width: 96, height: 96)
+                            .frame(width: 104, height: 104)
                             .overlay {
                                 Image(systemName: f.icon)
-                                    .font(.system(size: 40, weight: .semibold))
+                                    .font(.system(size: 46, weight: .semibold))
                                     .foregroundStyle(.white)
                             }
                             .shadow(color: .brand.opacity(0.4), radius: 18, y: 10)
 
-                        VStack(spacing: 12) {
+                        VStack(spacing: 13) {
                             Text(f.title)
-                                .font(.system(.title, design: .serif, weight: .bold))
+                                .font(.serifItalic(27, .heavy))
+                                .foregroundStyle(.textPrimary)
                                 .multilineTextAlignment(.center)
                             Text(f.text)
-                                .font(.callout)
-                                .foregroundStyle(.secondary)
+                                .font(.display(14.5, .medium))
+                                .foregroundStyle(.textSecondary)
                                 .multilineTextAlignment(.center)
-                                .lineSpacing(4)
-                                .padding(.horizontal, 34)
+                                .lineSpacing(8)
+                                .frame(maxWidth: 300)
                         }
                     }
                     .tag(i)
                     .padding(.bottom, 46)
                 }
             }
-            .tabViewStyle(.page(indexDisplayMode: .always))
-            .indexViewStyle(.page(backgroundDisplayMode: .always))
+            .tabViewStyle(.page(indexDisplayMode: .never))
+
+            // Dots de página (8pt, activo vino).
+            HStack(spacing: 8) {
+                ForEach(features.indices, id: \.self) { i in
+                    Circle()
+                        .fill(i == page ? Color.brand : Color.hairline)
+                        .frame(width: 8, height: 8)
+                }
+            }
+            .padding(.bottom, 22)
+            .animation(.smooth(duration: 0.25), value: page)
 
             Button {
                 if page < features.count - 1 {
@@ -86,8 +97,10 @@ struct OnboardingView: View {
             } label: {
                 Text(page < features.count - 1 ? "Siguiente" : "Comenzar")
                     .mainButtonLabel()
+                    .padding(.vertical, 4)
             }
             .buttonStyle(.glassProminent)
+            .buttonBorderShape(.roundedRectangle(radius: 18))
             .tint(.brand)
             .padding(.horizontal, 26)
             .padding(.bottom, 26)

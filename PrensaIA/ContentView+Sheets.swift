@@ -82,17 +82,19 @@ extension ContentView {
                             } label: {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(item.title)
-                                        .font(.subheadline.weight(.semibold))
-                                        .foregroundStyle(.primary)
+                                        .font(.display(14.5, .bold))
+                                        .foregroundStyle(.textPrimary)
                                         .lineLimit(2)
                                     HStack(spacing: 10) {
                                         Text(item.date.formatted(date: .abbreviated, time: .shortened))
+                                            .font(.serifItalic(12.5, .regular))
+                                            .foregroundStyle(.textTertiary)
                                         if item.analysis != nil {
                                             Label("Con análisis", systemImage: "sparkles")
+                                                .font(.display(11, .bold))
+                                                .foregroundStyle(.goldText)
                                         }
                                     }
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
                                 }
                             }
                         }
@@ -168,6 +170,11 @@ extension ContentView {
                         Text("Oscuro").tag("dark")
                     }
                     .pickerStyle(.segmented)
+                    Button {
+                        showOnboarding = true
+                    } label: {
+                        Label("Ver la bienvenida de nuevo", systemImage: "sparkles")
+                    }
                 }
             }
             .scrollContentBackground(.hidden)
